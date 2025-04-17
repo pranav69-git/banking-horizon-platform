@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,62 +7,26 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Shield, Key } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
-
-type UserProfile = {
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  dob: string;
-  panCard: string;
-};
+import { useUserContext } from "@/contexts/UserContext";
 
 export default function ProfilePage() {
-  const { toast } = useToast();
-  const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<UserProfile>({
-    name: "",
-    email: "",
-    phone: "",
-    address: "",
-    dob: "",
-    panCard: ""
-  });
-  
+  const { profile, updateProfile, logActivity } = useUserContext();
+  const [formData, setFormData] = useState({ ...profile });
   const [isEditing, setIsEditing] = useState(false);
-
-  useEffect(() => {
-    // Get user data from local storage
-    const storedUser = localStorage.getItem("bankingUser");
-    if (storedUser) {
-      const userData = JSON.parse(storedUser);
-      setUser(userData);
-      
-      // For demo - set profile data based on user
-      setProfile({
-        name: userData.name || "Vikram Sharma",
-        email: userData.email || "vikram.sharma@example.com",
-        phone: "+91 9876543210",
-        address: "123 MG Road, Bangalore, Karnataka 560001",
-        dob: "1985-06-15",
-        panCard: "ABCDE1234F"
-      });
-    }
-  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setProfile(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSaveProfile = () => {
-    // In a real app, we would send this to the backend
+    updateProfile(formData);
     setIsEditing(false);
-    toast({
-      title: "Profile Updated",
-      description: "Your profile information has been updated successfully.",
-    });
+    logActivity("Profile Updated", "Personal information was updated");
+  };
+
+  const handleViewTab = (tab: string) => {
+    logActivity("Viewed", `Viewed profile ${tab} tab`);
   };
 
   return (
@@ -73,7 +37,7 @@ export default function ProfilePage() {
           <p className="text-muted-foreground">Manage your personal information and security settings</p>
         </div>
 
-        <Tabs defaultValue="personal" className="w-full">
+        <Tabs defaultValue="personal" className="w-full" onValueChange={handleViewTab}>
           <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="personal" className="flex items-center gap-2">
               <User className="h-4 w-4" />
@@ -98,11 +62,34 @@ export default function ProfilePage() {
                     <CardDescription>Update your personal details</CardDescription>
                   </div>
                   {!isEditing ? (
-                    <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>
+                    <Button 
+                      onClick={() => {
+                        setIsEditing(true);
+                        logActivity("Started Editing", "Started editing profile information");
+                      }}
+                      aria-label="Edit profile"
+                    >
+                      Edit Profile
+                    </Button>
                   ) : (
                     <div className="flex gap-2">
-                      <Button variant="ghost" onClick={() => setIsEditing(false)}>Cancel</Button>
-                      <Button onClick={handleSaveProfile}>Save Changes</Button>
+                      <Button 
+                        variant="ghost" 
+                        onClick={() => {
+                          setIsEditing(false);
+                          setFormData({ ...profile });
+                          logActivity("Cancelled Edit", "Cancelled profile edit");
+                        }}
+                        aria-label="Cancel editing"
+                      >
+                        Cancel
+                      </Button>
+                      <Button 
+                        onClick={handleSaveProfile}
+                        aria-label="Save profile changes"
+                      >
+                        Save Changes
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -114,9 +101,11 @@ export default function ProfilePage() {
                     <Input
                       id="name"
                       name="name"
-                      value={profile.name}
+                      value={formData.name}
                       onChange={handleInputChange}
                       disabled={!isEditing}
+                      aria-label="Full name"
+                      aria-required="true"
                     />
                   </div>
                   <div className="space-y-2">
@@ -125,9 +114,11 @@ export default function ProfilePage() {
                       id="email"
                       name="email"
                       type="email"
-                      value={profile.email}
+                      value={formData.email}
                       onChange={handleInputChange}
                       disabled={!isEditing}
+                      aria-label="Email address"
+                      aria-required="true"
                     />
                   </div>
                   <div className="space-y-2">
@@ -135,9 +126,10 @@ export default function ProfilePage() {
                     <Input
                       id="phone"
                       name="phone"
-                      value={profile.phone}
+                      value={formData.phone}
                       onChange={handleInputChange}
                       disabled={!isEditing}
+                      aria-label="Phone number"
                     />
                   </div>
                   <div className="space-y-2">
@@ -146,9 +138,10 @@ export default function ProfilePage() {
                       id="dob"
                       name="dob"
                       type="date"
-                      value={profile.dob}
+                      value={formData.dob}
                       onChange={handleInputChange}
                       disabled={!isEditing}
+                      aria-label="Date of birth"
                     />
                   </div>
                   <div className="space-y-2 md:col-span-2">
@@ -156,9 +149,10 @@ export default function ProfilePage() {
                     <Input
                       id="address"
                       name="address"
-                      value={profile.address}
+                      value={formData.address}
                       onChange={handleInputChange}
                       disabled={!isEditing}
+                      aria-label="Address"
                     />
                   </div>
                   <div className="space-y-2">
@@ -166,9 +160,10 @@ export default function ProfilePage() {
                     <Input
                       id="panCard"
                       name="panCard"
-                      value={profile.panCard}
+                      value={formData.panCard}
                       onChange={handleInputChange}
                       disabled={!isEditing}
+                      aria-label="PAN card number"
                     />
                   </div>
                 </div>
@@ -184,8 +179,20 @@ export default function ProfilePage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <Button variant="outline">Change Password</Button>
-                  <Button variant="outline">Set up Two-Factor Authentication</Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => logActivity("Password Change", "Started password change process")}
+                    aria-label="Change password"
+                  >
+                    Change Password
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => logActivity("2FA", "Started two-factor authentication setup")}
+                    aria-label="Set up two-factor authentication"
+                  >
+                    Set up Two-Factor Authentication
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -200,7 +207,13 @@ export default function ProfilePage() {
               <CardContent>
                 <div className="space-y-4">
                   <p>Your documents are verified and up to date.</p>
-                  <Button variant="outline">Upload New Document</Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => logActivity("Document Upload", "Started new document upload")}
+                    aria-label="Upload new document"
+                  >
+                    Upload New Document
+                  </Button>
                 </div>
               </CardContent>
             </Card>

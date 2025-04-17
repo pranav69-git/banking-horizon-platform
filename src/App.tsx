@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import NotFound from "./pages/NotFound";
+import { UserProvider } from "./contexts/UserContext";
 
 // Auth pages
 import Login from "./pages/Login";
@@ -20,6 +21,8 @@ import InvestmentsPage from "./pages/investments/InvestmentsPage";
 import TransactionsPage from "./pages/transactions/TransactionsPage";
 import NewTransaction from "./pages/transactions/NewTransaction";
 import LoansPage from "./pages/loans/LoansPage";
+import SettingsPage from "./pages/settings/SettingsPage";
+import ActivityLogsPage from "./pages/activity/ActivityLogsPage";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -29,38 +32,42 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          {/* Redirect root to login */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          
-          {/* Auth Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/registration-success" element={<RegistrationSuccess />} />
-          
-          {/* Customer Dashboard Routes */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/accounts" element={<AccountsPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/investments" element={<InvestmentsPage />} />
-          <Route path="/transactions" element={<TransactionsPage />} />
-          <Route path="/transactions/new" element={<NewTransaction />} />
-          <Route path="/loans" element={<LoansPage />} />
-          
-          {/* Admin Routes */}
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/users" element={<UserManagement />} />
-          
-          {/* Catch-all Route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <UserProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            {/* Redirect root to login */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            
+            {/* Auth Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/registration-success" element={<RegistrationSuccess />} />
+            
+            {/* Customer Dashboard Routes */}
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/accounts" element={<AccountsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/investments" element={<InvestmentsPage />} />
+            <Route path="/transactions" element={<TransactionsPage />} />
+            <Route path="/transactions/new" element={<NewTransaction />} />
+            <Route path="/loans" element={<LoansPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/activity" element={<ActivityLogsPage />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/users" element={<UserManagement />} />
+            
+            {/* Catch-all Route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </UserProvider>
   </QueryClientProvider>
 );
 

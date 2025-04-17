@@ -9,6 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { User, Settings, Bell, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useUserContext } from "@/contexts/UserContext";
+import { Link } from "react-router-dom";
 
 // Mock data for accounts with Indian currency
 const mockAccounts = [
@@ -87,15 +89,12 @@ const mockTransactions = [
 ];
 
 export default function Dashboard() {
-  const [user, setUser] = useState<any>(null);
+  const { profile, logActivity } = useUserContext();
 
   useEffect(() => {
-    // Get user data from local storage
-    const storedUser = localStorage.getItem("bankingUser");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+    // Log dashboard visit
+    logActivity("Dashboard Visit", "User viewed the dashboard");
+  }, [logActivity]);
 
   // Calculate total balance, incoming, outgoing amounts
   const totalBalance = mockAccounts.reduce((sum, account) => sum + account.balance, 0);
@@ -114,14 +113,24 @@ export default function Dashboard() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">Welcome back, {user?.name || "Customer"}</h1>
+            <h1 className="text-3xl font-bold">Welcome back, {profile.name.split(" ")[0] || "Customer"}</h1>
             <p className="text-muted-foreground">Here's an overview of your accounts and recent activities</p>
           </div>
           <div className="flex space-x-2">
-            <Button variant="ghost" size="icon">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => logActivity("Notification", "Viewed notifications")}
+              aria-label="Notifications"
+            >
               <Bell className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => logActivity("Help", "Accessed help")}
+              aria-label="Help"
+            >
               <HelpCircle className="h-5 w-5" />
             </Button>
           </div>
@@ -131,7 +140,9 @@ export default function Dashboard() {
           <Settings className="h-4 w-4" />
           <AlertTitle>Complete Your Profile</AlertTitle>
           <AlertDescription>
-            Enhance your banking experience by updating your profile information.
+            <Link to="/profile" className="underline" onClick={() => logActivity("Profile Link", "Clicked profile link from dashboard")}>
+              Enhance your banking experience by updating your profile information.
+            </Link>
           </AlertDescription>
         </Alert>
 
@@ -149,7 +160,7 @@ export default function Dashboard() {
           ))}
         </div>
 
-        <Tabs defaultValue="transactions" className="mt-8">
+        <Tabs defaultValue="transactions" className="mt-8" onValueChange={(value) => logActivity("Tab Change", `Switched to ${value} tab on dashboard`)}>
           <TabsList>
             <TabsTrigger value="transactions">Recent Transactions</TabsTrigger>
             <TabsTrigger value="upcoming">Upcoming Payments</TabsTrigger>
@@ -166,7 +177,14 @@ export default function Dashboard() {
               <CardContent>
                 <div className="text-center py-6">
                   <p className="text-muted-foreground">No upcoming payments scheduled</p>
-                  <Button variant="outline" className="mt-4">Schedule a Payment</Button>
+                  <Button 
+                    variant="outline" 
+                    className="mt-4"
+                    onClick={() => logActivity("Payment", "Started scheduling a payment")}
+                    aria-label="Schedule a payment"
+                  >
+                    Schedule a Payment
+                  </Button>
                 </div>
               </CardContent>
             </Card>

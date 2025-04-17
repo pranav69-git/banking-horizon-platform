@@ -1,34 +1,36 @@
 
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useUserContext } from "@/contexts/UserContext";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-// Define the user type
-interface User {
-  name: string;
-  email: string;
-  role: string;
-  isAuthenticated: boolean;
-}
-
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const isMobile = useIsMobile();
-  const [user, setUser] = useState<User | null>(null);
+  const { user, updateUser, logActivity, profile } = useUserContext();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     // Check if the user is authenticated
     const storedUser = localStorage.getItem("bankingUser");
     if (storedUser) {
       try {
-        const parsedUser = JSON.parse(storedUser) as User;
+        const parsedUser = JSON.parse(storedUser);
         if (parsedUser.isAuthenticated) {
-          setUser(parsedUser);
+          setIsAuthenticated(true);
+          // Update user in context if needed
+          if (!user) {
+            updateUser(parsedUser);
+          }
+          // Log page visit
+          const pageName = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
+          logActivity("Page Visit", `Visited ${pageName} page`);
         } else {
           navigate("/login");
         }
@@ -39,15 +41,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     } else {
       navigate("/login");
     }
-  }, [navigate]);
+  }, [navigate, location.pathname, user, updateUser, logActivity]);
 
-  if (!user) {
+  if (!isAuthenticated) {
     return null; // Or a loading spinner
   }
 
   return (
     <div className="min-h-screen flex bg-background">
-      <Sidebar userRole={user.role} />
+      <Sidebar userName={profile.name} userRole={user?.role || "customer"} />
       <main
         className={`flex-1 transition-all duration-300 ${
           isMobile ? "ml-0" : "ml-[250px]"
