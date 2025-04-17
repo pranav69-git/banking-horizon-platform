@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useNavigate } from "react-router-dom";
 import { LockKeyhole, Mail, AlertCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +29,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useUserContext } from "@/contexts/UserContext";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -40,6 +43,8 @@ const formSchema = z.object({
 
 export function LoginForm() {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { updateUser, logActivity } = useUserContext();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -52,29 +57,61 @@ export function LoginForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     setError(null);
-    
-    // Here we would usually make an API call to authenticate the user
-    // For now, we'll just simulate a login
-    setTimeout(() => {
-      setIsLoading(false);
-      // Simulate successful login
-      if (values.email === "user@example.com" && values.password === "password123") {
-        const redirectPath = values.role === "admin" ? "/admin/dashboard" : "/dashboard";
-        // Store user info in localStorage (in a real app, we'd use httpOnly cookies and JWTs)
-        localStorage.setItem("bankingUser", JSON.stringify({
-          name: "John Doe",
-          email: values.email,
-          role: values.role,
-          isAuthenticated: true,
-        }));
-        navigate(redirectPath);
-      } else {
-        setError("Invalid email or password");
+
+    try {
+      // Sign in with Supabase auth
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
+      });
+
+      if (signInError) {
+        throw signInError;
       }
-    }, 1000);
+
+      if (data.user) {
+        // Store user info in localStorage for app usage
+        const userData = {
+          name: data.user.user_metadata?.name || "User",
+          email: data.user.email,
+          role: values.role, // Using the selected role from form
+          isAuthenticated: true,
+        };
+        
+        localStorage.setItem("bankingUser", JSON.stringify(userData));
+        
+        // Update user in context
+        updateUser(userData);
+        
+        // Log activity
+        logActivity("Login", "User logged in successfully");
+        
+        // Show success toast
+        toast({
+          title: "Login successful",
+          description: "Welcome back to Banking Horizon!",
+        });
+        
+        // Redirect based on role
+        const redirectPath = values.role === "admin" ? "/admin/dashboard" : "/dashboard";
+        navigate(redirectPath);
+      }
+    } catch (error: any) {
+      console.error("Login error:", error);
+      
+      setError(error.message || "Failed to log in. Please check your credentials.");
+      
+      toast({
+        variant: "destructive",
+        title: "Login failed",
+        description: error.message || "Please check your credentials and try again",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (

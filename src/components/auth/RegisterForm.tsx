@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useNavigate } from "react-router-dom";
 import { User, Mail, Calendar, LockKeyhole, AlertCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -65,6 +67,7 @@ const formSchema = z.object({
 
 export function RegisterForm() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -79,18 +82,70 @@ export function RegisterForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     setError(null);
     
-    // Here we would usually make an API call to register the user
-    // For now, we'll just simulate a registration
-    setTimeout(() => {
+    console.log("Registration values:", values);
+    
+    try {
+      // Register with Supabase auth
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+        options: {
+          data: {
+            name: values.name,
+            dob: values.dob,
+            acc_type: values.accountType,
+          }
+        }
+      });
+
+      if (signUpError) {
+        throw signUpError;
+      }
+
+      if (data.user) {
+        // Create customer record in database
+        const { error: customerError } = await supabase
+          .from('customers')
+          .insert([
+            { 
+              id: data.user.id,
+              name: values.name, 
+              email: values.email,
+              dob: values.dob,
+              acc_type: values.accountType
+            }
+          ]);
+
+        if (customerError) {
+          throw customerError;
+        }
+
+        // Show success toast
+        toast({
+          title: "Registration successful",
+          description: "Your account has been created successfully!",
+        });
+        
+        // Navigate to success page
+        navigate("/registration-success");
+      }
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      
+      setError(error.message || "Failed to register. Please try again.");
+      
+      toast({
+        variant: "destructive",
+        title: "Registration failed",
+        description: error.message || "Please check your details and try again",
+      });
+    } finally {
       setIsLoading(false);
-      // Simulate successful registration
-      console.log("Registration values:", values);
-      navigate("/registration-success");
-    }, 1500);
+    }
   }
 
   const maxDate = () => {
