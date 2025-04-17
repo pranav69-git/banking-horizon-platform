@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import {
@@ -33,29 +32,29 @@ import { Users, DollarSign, PiggyBank, AlertTriangle, Download } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-// Mock data for the admin dashboard
+// Mock data for the admin dashboard with Indian names
 const customerData = [
-  { id: 1, name: "John Doe", email: "john@example.com", status: "active", accounts: 2 },
-  { id: 2, name: "Jane Smith", email: "jane@example.com", status: "active", accounts: 1 },
-  { id: 3, name: "Bob Johnson", email: "bob@example.com", status: "inactive", accounts: 1 },
-  { id: 4, name: "Alice Brown", email: "alice@example.com", status: "active", accounts: 3 },
-  { id: 5, name: "Charlie Wilson", email: "charlie@example.com", status: "pending", accounts: 0 },
+  { id: 1, name: "Rajesh Kumar", email: "rajesh@example.com", status: "active", accounts: 2 },
+  { id: 2, name: "Priya Sharma", email: "priya@example.com", status: "active", accounts: 1 },
+  { id: 3, name: "Vikram Singh", email: "vikram@example.com", status: "inactive", accounts: 1 },
+  { id: 4, name: "Ananya Patel", email: "ananya@example.com", status: "active", accounts: 3 },
+  { id: 5, name: "Arjun Mehta", email: "arjun@example.com", status: "pending", accounts: 0 },
 ];
 
 const loanData = [
-  { id: "LN-001", customer: "John Doe", type: "Personal", amount: 5000, status: "approved" },
-  { id: "LN-002", customer: "Jane Smith", type: "Mortgage", amount: 250000, status: "pending" },
-  { id: "LN-003", customer: "Bob Johnson", type: "Personal", amount: 2000, status: "rejected" },
-  { id: "LN-004", customer: "Alice Brown", type: "Auto", amount: 15000, status: "pending" },
+  { id: "LN-001", customer: "Rajesh Kumar", type: "Personal", amount: 500000, status: "approved" },
+  { id: "LN-002", customer: "Priya Sharma", type: "Mortgage", amount: 25000000, status: "pending" },
+  { id: "LN-003", customer: "Vikram Singh", type: "Personal", amount: 200000, status: "rejected" },
+  { id: "LN-004", customer: "Ananya Patel", type: "Auto", amount: 1500000, status: "pending" },
 ];
 
 const transactionStats = [
-  { name: "Jan", deposits: 12000, withdrawals: 8000, transfers: 5000 },
-  { name: "Feb", deposits: 15000, withdrawals: 10000, transfers: 7000 },
-  { name: "Mar", deposits: 18000, withdrawals: 9000, transfers: 9000 },
-  { name: "Apr", deposits: 20000, withdrawals: 12000, transfers: 8000 },
-  { name: "May", deposits: 22000, withdrawals: 14000, transfers: 10000 },
-  { name: "Jun", deposits: 19000, withdrawals: 11000, transfers: 9500 },
+  { name: "Jan", deposits: 1200000, withdrawals: 800000, transfers: 500000 },
+  { name: "Feb", deposits: 1500000, withdrawals: 1000000, transfers: 700000 },
+  { name: "Mar", deposits: 1800000, withdrawals: 900000, transfers: 900000 },
+  { name: "Apr", deposits: 2000000, withdrawals: 1200000, transfers: 800000 },
+  { name: "May", deposits: 2200000, withdrawals: 1400000, transfers: 1000000 },
+  { name: "Jun", deposits: 1900000, withdrawals: 1100000, transfers: 950000 },
 ];
 
 const accountTypeData = [
@@ -116,7 +115,7 @@ export default function AdminDashboard() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Deposits</p>
-                <h4 className="text-2xl font-bold">$1.2M</h4>
+                <h4 className="text-2xl font-bold">₹12M</h4>
                 <p className="text-xs text-green-600">+8.5% this month</p>
               </div>
             </CardContent>
@@ -130,7 +129,7 @@ export default function AdminDashboard() {
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Active Loans</p>
                 <h4 className="text-2xl font-bold">42</h4>
-                <p className="text-xs text-green-600">$850K total value</p>
+                <p className="text-xs text-green-600">₹8.5M total value</p>
               </div>
             </CardContent>
           </Card>

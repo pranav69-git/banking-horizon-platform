@@ -38,32 +38,32 @@ import {
 import { Label } from "@/components/ui/label";
 import { Search, MoreHorizontal, UserPlus, Mail, Lock, UserCheck, UserX } from "lucide-react";
 
-// Mock data for users
+// Mock data for users with Indian names and INR values
 const mockUsers = [
   {
     id: 1,
-    name: "John Doe",
-    email: "john@example.com",
+    name: "Rajesh Kumar",
+    email: "rajesh@example.com",
     dateJoined: "2023-01-15",
     accountType: "Premium",
     status: "active",
     accountsCount: 2,
-    totalBalance: 7991.25,
+    totalBalance: 799125.25,
   },
   {
     id: 2,
-    name: "Jane Smith",
-    email: "jane@example.com",
+    name: "Priya Sharma",
+    email: "priya@example.com",
     dateJoined: "2023-02-20",
     accountType: "Standard",
     status: "active",
     accountsCount: 1,
-    totalBalance: 2150.75,
+    totalBalance: 215075.75,
   },
   {
     id: 3,
-    name: "Bob Johnson",
-    email: "bob@example.com",
+    name: "Vikram Singh",
+    email: "vikram@example.com",
     dateJoined: "2023-03-10",
     accountType: "Standard",
     status: "inactive",
@@ -72,18 +72,18 @@ const mockUsers = [
   },
   {
     id: 4,
-    name: "Alice Brown",
-    email: "alice@example.com",
+    name: "Ananya Patel",
+    email: "ananya@example.com",
     dateJoined: "2023-01-05",
     accountType: "Premium",
     status: "active",
     accountsCount: 3,
-    totalBalance: 15200.50,
+    totalBalance: 1520050.50,
   },
   {
     id: 5,
-    name: "Charlie Wilson",
-    email: "charlie@example.com",
+    name: "Arjun Mehta",
+    email: "arjun@example.com",
     dateJoined: "2023-04-02",
     accountType: "Standard",
     status: "pending",
@@ -92,33 +92,33 @@ const mockUsers = [
   },
   {
     id: 6,
-    name: "David Miller",
-    email: "david@example.com",
+    name: "Dev Malhotra",
+    email: "dev@example.com",
     dateJoined: "2023-02-22",
     accountType: "Standard",
     status: "active",
     accountsCount: 1,
-    totalBalance: 3250.25,
+    totalBalance: 325025.25,
   },
   {
     id: 7,
-    name: "Eva Garcia",
-    email: "eva@example.com",
+    name: "Meera Gupta",
+    email: "meera@example.com",
     dateJoined: "2023-03-15",
     accountType: "Premium",
     status: "active",
     accountsCount: 2,
-    totalBalance: 9800.00,
+    totalBalance: 980000.00,
   },
   {
     id: 8,
-    name: "Frank Lee",
-    email: "frank@example.com",
+    name: "Sanjay Reddy",
+    email: "sanjay@example.com",
     dateJoined: "2023-01-30",
     accountType: "Standard",
     status: "inactive",
     accountsCount: 1,
-    totalBalance: 120.50,
+    totalBalance: 12050.50,
   },
 ];
 
@@ -129,11 +129,11 @@ export default function UserManagement() {
   const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
 
-  // Format currency
+  // Format currency in INR
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-IN", {
       style: "currency",
-      currency: "USD",
+      currency: "INR",
     }).format(amount);
   };
 

@@ -1,4 +1,3 @@
-
 import { ArrowUpRight, ArrowDownRight, ArrowRight, Search } from "lucide-react";
 import {
   Table,
@@ -47,7 +46,6 @@ export function TransactionsList({
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   
-  // Filter transactions based on search term
   const filteredTransactions = transactions.filter(
     (transaction) =>
       transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -56,20 +54,17 @@ export function TransactionsList({
       transaction.status.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Apply limit if provided
   const displayTransactions = limit 
     ? filteredTransactions.slice(0, limit) 
     : filteredTransactions;
 
-  // Function to format currency
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-IN", {
       style: "currency",
-      currency: "USD",
+      currency: "INR",
     }).format(amount);
   };
 
-  // Function to get icon based on transaction type
   const getTransactionIcon = (type: string) => {
     switch (type) {
       case "deposit":
@@ -83,7 +78,6 @@ export function TransactionsList({
     }
   };
 
-  // Function to get status badge color
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case "completed":

@@ -27,9 +27,9 @@ export function AccountSummaryCard({
 }: AccountSummaryCardProps) {
   const navigate = useNavigate();
   
-  // Function to format currency
+  // Function to format currency in INR
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-IN", {
       style: "currency",
       currency: currency,
     }).format(amount);

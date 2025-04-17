@@ -10,16 +10,16 @@ import { User, Settings, Bell, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-// Mock data for accounts
+// Mock data for accounts with Indian currency
 const mockAccounts = [
   {
     accountId: "SA-12345678",
     accountType: "savings",
-    balance: 5840.50,
-    currency: "USD",
+    balance: 584050.50,
+    currency: "INR",
     isActive: true,
     lastTransaction: {
-      amount: 250.00,
+      amount: 25000.00,
       date: "2023-04-15",
       type: "credit" as const,
     },
@@ -27,24 +27,24 @@ const mockAccounts = [
   {
     accountId: "CA-87654321",
     accountType: "current",
-    balance: 2150.75,
-    currency: "USD",
+    balance: 215075.75,
+    currency: "INR",
     isActive: true,
     lastTransaction: {
-      amount: 120.50,
+      amount: 12050.50,
       date: "2023-04-14",
       type: "debit" as const,
     },
   },
 ];
 
-// Mock data for transactions
+// Mock data for transactions with Indian names
 const mockTransactions = [
   {
     id: "TRX-001",
     date: "2023-04-15",
     type: "deposit" as const,
-    amount: 250.00,
+    amount: 25000.00,
     description: "Salary deposit",
     status: "completed" as const,
   },
@@ -52,7 +52,7 @@ const mockTransactions = [
     id: "TRX-002",
     date: "2023-04-14",
     type: "withdrawal" as const,
-    amount: 120.50,
+    amount: 12050.50,
     description: "ATM withdrawal",
     status: "completed" as const,
   },
@@ -60,8 +60,8 @@ const mockTransactions = [
     id: "TRX-003",
     date: "2023-04-13",
     type: "transfer" as const,
-    amount: 500.00,
-    description: "Transfer to John Doe",
+    amount: 50000.00,
+    description: "Transfer to Rahul Sharma",
     status: "completed" as const,
     fromAccount: "SA-12345678",
     toAccount: "External",
@@ -70,7 +70,7 @@ const mockTransactions = [
     id: "TRX-004",
     date: "2023-04-12",
     type: "deposit" as const,
-    amount: 1000.00,
+    amount: 100000.00,
     description: "Bonus payment",
     status: "completed" as const,
   },
@@ -78,7 +78,7 @@ const mockTransactions = [
     id: "TRX-005",
     date: "2023-04-10",
     type: "transfer" as const,
-    amount: 75.25,
+    amount: 7525.25,
     description: "Utility bill payment",
     status: "pending" as const,
     fromAccount: "CA-87654321",

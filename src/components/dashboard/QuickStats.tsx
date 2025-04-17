@@ -22,11 +22,11 @@ export function QuickStats({
   outgoingAmount,
   pendingTransactions,
 }: QuickStatsProps) {
-  // Function to format currency
+  // Function to format currency in INR
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-IN", {
       style: "currency",
-      currency: "USD",
+      currency: "INR",
     }).format(amount);
   };
 
