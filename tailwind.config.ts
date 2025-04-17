@@ -52,6 +52,17 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				// Banking system colors
+				banking: {
+					primary: '#0A2463',
+					secondary: '#247BA0',
+					accent: '#70C1B3',
+					warning: '#F4A261',
+					error: '#E76F51',
+					success: '#2A9D8F',
+					light: '#F8F9FA',
+					dark: '#212529',
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',

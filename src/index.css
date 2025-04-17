@@ -13,42 +13,40 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
+    /* Banking themed colors */
+    --primary: 217 90% 22%;    /* #0A2463 - Navy blue */
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 196 63% 38%;  /* #247BA0 - Light blue */
+    --secondary-foreground: 210 40% 98%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 169 44% 60%;     /* #70C1B3 - Teal accent */
+    --accent-foreground: 222.2 84% 4.9%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 9 76% 61%;  /* #E76F51 - Error red */
     --destructive-foreground: 210 40% 98%;
+
+    --success: 170 54% 40%;    /* #2A9D8F - Success green */
+
+    --warning: 27 87% 67%;     /* #F4A261 - Warning orange */
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 196 63% 38%;       /* Match secondary color */
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;         /* Slightly more rounded corners */
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 217 90% 22%; /* Navy background */
+    --sidebar-foreground: 0 0% 100%;  /* White text */
+    --sidebar-primary: 196 63% 38%;   /* Light blue accent */
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 217 90% 25%;    /* Slightly lighter navy */
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 217 90% 30%;    /* Border color */
+    --sidebar-ring: 196 63% 38%;      /* Ring color */
   }
 
   .dark {
@@ -61,32 +59,38 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 196 63% 38%;    /* #247BA0 - Light blue as primary in dark mode */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 217 90% 22%;  /* #0A2463 - Navy blue as secondary */
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 169 44% 60%;     /* #70C1B3 - Maintain teal accent */
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 9 76% 61%;  /* #E76F51 - Error red */
     --destructive-foreground: 210 40% 98%;
+
+    --success: 170 54% 40%;    /* #2A9D8F - Success green */
+    
+    --warning: 27 87% 67%;     /* #F4A261 - Warning orange */
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --ring: 196 63% 38%;
+    
+    /* Updated sidebar colors for dark mode */
+    --sidebar-background: 220 25% 15%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 196 63% 38%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 220 25% 20%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 220 25% 25%;
+    --sidebar-ring: 196 63% 38%;
   }
 }
 
