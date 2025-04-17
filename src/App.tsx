@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +14,9 @@ import RegistrationSuccess from "./pages/RegistrationSuccess";
 
 // Customer Dashboard pages
 import Dashboard from "./pages/dashboard/Dashboard";
+import AccountsPage from "./pages/accounts/AccountsPage";
+import ProfilePage from "./pages/profile/ProfilePage";
+import InvestmentsPage from "./pages/investments/InvestmentsPage";
 import TransactionsPage from "./pages/transactions/TransactionsPage";
 import NewTransaction from "./pages/transactions/NewTransaction";
 import LoansPage from "./pages/loans/LoansPage";
@@ -41,6 +45,9 @@ const App = () => (
           
           {/* Customer Dashboard Routes */}
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/accounts" element={<AccountsPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/investments" element={<InvestmentsPage />} />
           <Route path="/transactions" element={<TransactionsPage />} />
           <Route path="/transactions/new" element={<NewTransaction />} />
           <Route path="/loans" element={<LoansPage />} />
