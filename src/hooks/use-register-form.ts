@@ -61,8 +61,8 @@ export function useRegisterForm() {
     setError(null);
     
     try {
-      // 1. Sign up the user
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      // Sign up the user with their profile data in metadata
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
@@ -78,32 +78,17 @@ export function useRegisterForm() {
         throw signUpError;
       }
 
-      if (!signUpData.user) {
-        throw new Error("Failed to create user");
+      if (!data.user) {
+        throw new Error("Failed to create user account");
       }
 
-      // 2. Insert customer record directly
-      const { error: customerError } = await supabase
-        .from('customers')
-        .insert([{ 
-          id: signUpData.user.id,
-          name: values.name, 
-          email: values.email,
-          dob: values.dob,
-          acc_type: values.accountType
-        }]);
-
-      if (customerError) {
-        console.error("Customer record error:", customerError);
-        throw new Error(`Failed to create customer record: ${customerError.message}`);
-      }
-
+      // Successfully created user account
       toast({
         title: "Registration successful",
         description: "Your account has been created successfully!",
       });
       
-      // Navigate to success page without trying to log in immediately
+      // Navigate to success page
       navigate("/registration-success");
       
     } catch (error: any) {
