@@ -107,21 +107,26 @@ export function RegisterForm() {
       }
 
       if (data.user) {
-        // With RLS policies in place, we need to use the user's own auth session
-        // to insert their customer record, ensuring the ID matches the auth user ID
+        // Sign in the user immediately after sign up
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: values.email,
+          password: values.password,
+        });
 
-        // Create customer record in database with the exact same ID as the auth user
+        if (signInError) {
+          throw signInError;
+        }
+
+        // Now that the user is signed in, create customer record with the same ID
         const { error: customerError } = await supabase
           .from('customers')
-          .insert([
-            { 
-              id: data.user.id,
-              name: values.name, 
-              email: values.email,
-              dob: values.dob,
-              acc_type: values.accountType
-            }
-          ]);
+          .insert([{ 
+            id: data.user.id,
+            name: values.name, 
+            email: values.email,
+            dob: values.dob,
+            acc_type: values.accountType
+          }]);
 
         if (customerError) {
           console.error("Customer record error:", customerError);
