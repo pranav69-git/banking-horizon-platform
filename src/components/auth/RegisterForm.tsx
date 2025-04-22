@@ -107,7 +107,10 @@ export function RegisterForm() {
       }
 
       if (data.user) {
-        // Create customer record in database
+        // With RLS policies in place, we need to use the user's own auth session
+        // to insert their customer record, ensuring the ID matches the auth user ID
+
+        // Create customer record in database with the exact same ID as the auth user
         const { error: customerError } = await supabase
           .from('customers')
           .insert([
@@ -121,7 +124,8 @@ export function RegisterForm() {
           ]);
 
         if (customerError) {
-          throw customerError;
+          console.error("Customer record error:", customerError);
+          throw new Error(`Failed to create customer record: ${customerError.message}`);
         }
 
         // Show success toast
