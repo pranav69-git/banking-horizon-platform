@@ -61,6 +61,7 @@ export function RegisterForm() {
               control={form.control}
               name="dob"
               label="Date of Birth"
+              placeholder="YYYY-MM-DD"
               type="date"
               max={maxDate()}
               icon={Calendar}

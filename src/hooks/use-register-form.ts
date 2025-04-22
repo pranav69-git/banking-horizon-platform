@@ -61,7 +61,8 @@ export function useRegisterForm() {
     setError(null);
     
     try {
-      const { data, error: signUpError } = await supabase.auth.signUp({
+      // 1. Sign up the user
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
@@ -77,38 +78,34 @@ export function useRegisterForm() {
         throw signUpError;
       }
 
-      if (data.user) {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: values.email,
-          password: values.password,
-        });
-
-        if (signInError) {
-          throw signInError;
-        }
-
-        const { error: customerError } = await supabase
-          .from('customers')
-          .insert([{ 
-            id: data.user.id,
-            name: values.name, 
-            email: values.email,
-            dob: values.dob,
-            acc_type: values.accountType
-          }]);
-
-        if (customerError) {
-          console.error("Customer record error:", customerError);
-          throw new Error(`Failed to create customer record: ${customerError.message}`);
-        }
-
-        toast({
-          title: "Registration successful",
-          description: "Your account has been created successfully!",
-        });
-        
-        navigate("/registration-success");
+      if (!signUpData.user) {
+        throw new Error("Failed to create user");
       }
+
+      // 2. Insert customer record directly
+      const { error: customerError } = await supabase
+        .from('customers')
+        .insert([{ 
+          id: signUpData.user.id,
+          name: values.name, 
+          email: values.email,
+          dob: values.dob,
+          acc_type: values.accountType
+        }]);
+
+      if (customerError) {
+        console.error("Customer record error:", customerError);
+        throw new Error(`Failed to create customer record: ${customerError.message}`);
+      }
+
+      toast({
+        title: "Registration successful",
+        description: "Your account has been created successfully!",
+      });
+      
+      // Navigate to success page without trying to log in immediately
+      navigate("/registration-success");
+      
     } catch (error: any) {
       console.error("Registration error:", error);
       setError(error.message || "Failed to register. Please try again.");
