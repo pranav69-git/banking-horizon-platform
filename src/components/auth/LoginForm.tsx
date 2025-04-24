@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useNavigate } from "react-router-dom";
-import { Mail, LockKeyhole, AlertCircle } from "lucide-react";
+import { Mail, LockKeyhole, AlertCircle, Loader2 } from "lucide-react";
 import { useUserContext } from "@/contexts/UserContext";
 import { useToast } from "@/hooks/use-toast";
 
@@ -27,7 +27,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -54,36 +53,23 @@ export function LoginForm() {
     setError(null);
     
     try {
-      // Use direct Supabase login first to check credentials
-      const { data, error: loginError } = await supabase.auth.signInWithPassword({
-        email: values.email,
-        password: values.password
-      });
+      // Use the context's loginUser function which handles both Supabase auth and context updates
+      const { success, error } = await loginUser(values.email, values.password);
       
-      if (loginError) {
-        console.error("Supabase login error:", loginError);
-        throw loginError;
-      }
-
-      // If direct login successful, update context
-      if (data && data.user) {
-        console.log("Login successful:", data);
-        
-        // Update user context
-        const { success, error } = await loginUser(values.email, values.password);
-        
-        if (!success && error) {
-          console.error("Context update error:", error);
-          setError(error);
-        } else {
-          toast({
-            title: "Login successful",
-            description: "Welcome back to Banking Horizon!",
-          });
-          navigate("/dashboard");
-        }
+      if (success) {
+        toast({
+          title: "Login successful",
+          description: "Welcome back to Banking Horizon!",
+        });
+        navigate("/dashboard");
       } else {
-        throw new Error("No user data returned from login");
+        setError(error || "Failed to login. Please check your credentials.");
+        
+        toast({
+          variant: "destructive",
+          title: "Login failed",
+          description: error || "Please check your credentials and try again",
+        });
       }
     } catch (error: any) {
       console.error("Login error:", error);
@@ -165,7 +151,12 @@ export function LoginForm() {
               className="w-full bg-banking-primary hover:bg-banking-primary/90 mt-4"
               disabled={isLoading}
             >
-              {isLoading ? "Logging in..." : "Log in"}
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+                  Logging in...
+                </>
+              ) : "Log in"}
             </Button>
           </form>
         </Form>

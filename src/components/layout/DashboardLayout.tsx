@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useUserContext } from "@/contexts/UserContext";
+import { Loader2 } from "lucide-react";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -33,13 +34,19 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       setIsLoading(false);
     };
     
-    checkAuth();
+    // Short timeout to ensure auth state is properly set
+    const timer = setTimeout(() => {
+      checkAuth();
+    }, 500);
+    
+    return () => clearTimeout(timer);
   }, [navigate, location.pathname, isAuthenticated, logActivity]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-banking-primary"></div>
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-banking-primary mb-4" />
+        <p className="text-banking-primary">Loading your banking dashboard...</p>
       </div>
     );
   }

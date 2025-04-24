@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Session } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +12,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<UserProfile>(defaultProfile);
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Fetch user profile from customers table
   const fetchUserProfile = async (userId: string) => {
@@ -31,17 +31,61 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (data) {
         console.log("Profile data fetched:", data);
-        setProfile({
-          ...profile,
-          name: data.name || profile.name,
-          email: data.email || profile.email,
-          dob: data.dob || profile.dob,
-        });
+        const updatedProfile: UserProfile = {
+          name: data.name || defaultProfile.name,
+          email: data.email || defaultProfile.email,
+          dob: data.dob || defaultProfile.dob,
+          phone: defaultProfile.phone,
+          address: defaultProfile.address,
+          panCard: defaultProfile.panCard,
+        };
+        
+        setProfile(updatedProfile);
+        
+        // Save profile to localStorage for persistence
+        localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
       } else {
         console.log("No profile data found for user");
+        // Try to load from localStorage as fallback
+        const savedProfile = localStorage.getItem("userProfile");
+        if (savedProfile) {
+          setProfile(JSON.parse(savedProfile));
+        }
       }
     } catch (error) {
       console.error('Error fetching user profile:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch user accounts, transactions, loans, and investments
+  const fetchUserData = async (userId: string) => {
+    if (!userId) return;
+    
+    try {
+      // All these operations can happen in parallel for better performance
+      await Promise.all([
+        // These would normally fetch from their respective tables
+        // but we'll keep the mock data for now
+        fetchActivityLogs(userId)
+      ]);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
+  // Fetch user activity logs from localStorage or create new
+  const fetchActivityLogs = async (userId: string) => {
+    try {
+      // Try to get from localStorage first
+      const storedLogs = localStorage.getItem(`activityLogs_${userId}`);
+      if (storedLogs) {
+        const parsedLogs = JSON.parse(storedLogs);
+        setActivityLogs(parsedLogs);
+      }
+    } catch (error) {
+      console.error("Error fetching activity logs:", error);
     }
   };
 
@@ -62,8 +106,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (data.user) {
         console.log("Login successful for user:", data.user.id);
+        // Use setTimeout to avoid Supabase auth deadlock
         setTimeout(() => {
           fetchUserProfile(data.user.id);
+          fetchUserData(data.user.id);
         }, 0);
         logActivity("Login", "User logged in successfully");
       }
@@ -82,12 +128,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Logout user
   const logoutUser = async () => {
     try {
+      // Save any unsaved data before logging out
+      if (user?.id) {
+        const userLogsToSave = JSON.stringify(activityLogs);
+        localStorage.setItem(`activityLogs_${user.id}`, userLogsToSave);
+        localStorage.setItem("userProfile", JSON.stringify(profile));
+      }
+      
       await supabase.auth.signOut();
       setUser(null);
       setSession(null);
       setIsAuthenticated(false);
       logActivity("Logout", "User logged out");
-      setProfile(defaultProfile);
+      
+      // Don't clear profile on logout to maintain UI consistency
+      // But mark as not authenticated
     } catch (error: any) {
       console.error("Logout error:", error);
       toast({
@@ -105,13 +160,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Update profile data
-  const updateProfile = (profileData: Partial<UserProfile>) => {
+  const updateProfile = async (profileData: Partial<UserProfile>) => {
     const updatedProfile = { ...profile, ...profileData };
     setProfile(updatedProfile);
     
     if (profileData.name && user) {
       const updatedUser = { ...user, name: profileData.name };
       setUser(updatedUser);
+    }
+    
+    // Save to localStorage for persistence
+    localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
+    
+    // If authenticated, also update in database
+    if (user?.id) {
+      try {
+        const { error } = await supabase
+          .from('customers')
+          .update({ 
+            name: updatedProfile.name,
+            email: updatedProfile.email,
+            dob: updatedProfile.dob
+          })
+          .eq('id', user.id);
+        
+        if (error) throw error;
+      } catch (error) {
+        console.error("Error updating profile in database:", error);
+      }
     }
     
     logActivity("Profile Updated", "Profile information was updated");
@@ -134,8 +210,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const updatedLogs = [newLog, ...activityLogs];
     setActivityLogs(updatedLogs);
     
+    // Store in localStorage for persistence, limited to 100 entries
     const logsToStore = updatedLogs.slice(0, 100);
-    localStorage.setItem("activityLogs", JSON.stringify(logsToStore));
+    if (user?.id) {
+      localStorage.setItem(`activityLogs_${user.id}`, JSON.stringify(logsToStore));
+    } else {
+      localStorage.setItem("activityLogs", JSON.stringify(logsToStore));
+    }
     
     console.log("Activity logged:", action, details);
   };
@@ -146,6 +227,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
+    // Start by setting up the auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
       console.log("Auth state change event:", event);
       setSession(newSession);
@@ -154,8 +236,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (event === 'SIGNED_IN' && newSession?.user) {
         console.log("User signed in:", newSession.user);
+        // Use setTimeout to avoid Supabase auth deadlock
         setTimeout(() => {
           fetchUserProfile(newSession.user.id);
+          fetchUserData(newSession.user.id);
         }, 0);
         logActivity("Sign In", "User signed in successfully");
       } else if (event === 'SIGNED_OUT') {
@@ -163,6 +247,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
 
+    // Then check for an existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       console.log("Current session:", currentSession);
       setSession(currentSession);
@@ -170,12 +255,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsAuthenticated(!!currentSession);
       
       if (currentSession?.user) {
+        // Use setTimeout to avoid Supabase auth deadlock
         setTimeout(() => {
           fetchUserProfile(currentSession.user.id);
+          fetchUserData(currentSession.user.id);
         }, 0);
         logActivity("Session Restored", "User session was restored");
+      } else {
+        setIsLoading(false);
       }
     });
+
+    // Check for saved activity logs for non-authenticated users
+    const guestLogs = localStorage.getItem("activityLogs");
+    if (guestLogs) {
+      setActivityLogs(JSON.parse(guestLogs));
+    }
 
     return () => subscription.unsubscribe();
   }, []);
