@@ -1,22 +1,28 @@
 
-import React, { useState, useEffect } from "react";
-import { Session } from "@supabase/supabase-js";
+import React from "react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { AuthContext } from "./AuthContext";
-import { UserProfile, ActivityLog, defaultProfile } from "../types/auth-types";
-import { saveActivityLogs, loadActivityLogs, createActivityLog } from "@/utils/activity-logger";
-import { saveProfileToStorage, loadProfileFromStorage, fetchUserProfile, updateUserProfileInDB } from "@/utils/profile-manager";
+import { useAuthState } from "@/hooks/use-auth-state";
+import { useAuthEffects } from "@/hooks/use-auth-effects";
+import { saveActivityLogs, createActivityLog } from "@/utils/activity-logger";
+import { saveProfileToStorage, updateUserProfileInDB } from "@/utils/profile-manager";
 import { loginWithEmail, logoutUser } from "@/utils/auth-utils";
+import { UserProfile } from "../types/auth-types";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { toast } = useToast();
-  const [user, setUser] = useState<any>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<UserProfile>(defaultProfile);
-  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const {
+    user,
+    session,
+    profile,
+    activityLogs,
+    isAuthenticated,
+    setProfile,
+    setActivityLogs,
+  } = useAuthState();
+
+  // Set up auth effects
+  useAuthEffects();
 
   // Log activity and update state
   const logActivity = (action: string, details: string) => {
@@ -73,65 +79,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  useEffect(() => {
-    // Set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
-      console.log("Auth state change event:", event);
-      setSession(newSession);
-      setUser(newSession?.user ?? null);
-      setIsAuthenticated(!!newSession);
-      
-      if (event === 'SIGNED_IN' && newSession?.user) {
-        // Use setTimeout to avoid Supabase auth deadlock
-        setTimeout(() => {
-          fetchUserProfile(newSession.user.id).then(data => {
-            if (data) {
-              const updatedProfile: UserProfile = {
-                name: data.name || defaultProfile.name,
-                email: data.email || defaultProfile.email,
-                dob: data.dob || defaultProfile.dob,
-                phone: defaultProfile.phone,
-                address: defaultProfile.address,
-                panCard: defaultProfile.panCard,
-              };
-              setProfile(updatedProfile);
-              saveProfileToStorage(updatedProfile);
-            }
-          });
-          
-          // Load activity logs
-          const savedLogs = loadActivityLogs(newSession.user.id);
-          setActivityLogs(savedLogs);
-        }, 0);
-        
-        logActivity("Sign In", "User signed in successfully");
-      }
-    });
-
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      setIsAuthenticated(!!currentSession);
-      
-      if (currentSession?.user) {
-        setTimeout(() => {
-          fetchUserProfile(currentSession.user.id);
-        }, 0);
-      }
-      
-      setIsLoading(false);
-    });
-
-    // Load guest activity logs
-    const guestLogs = loadActivityLogs(undefined);
-    if (guestLogs.length > 0) {
-      setActivityLogs(guestLogs);
-    }
-
-    return () => subscription.unsubscribe();
-  }, []);
-
   return (
     <AuthContext.Provider
       value={{
@@ -139,7 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         session,
         profile,
         activityLogs,
-        updateUser: setUser,
+        updateUser: setProfile,
         updateProfile,
         logActivity,
         getRecentActivities: (limit = 10) => activityLogs.slice(0, limit),
