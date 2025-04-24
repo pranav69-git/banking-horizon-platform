@@ -74,30 +74,42 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<UserProfile>(defaultProfile);
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isProfileLoaded, setIsProfileLoaded] = useState<boolean>(false);
 
   // Check for existing session on initial render
   useEffect(() => {
-    // Get current session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsAuthenticated(!!session);
+    // Listen for auth state changes first
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+      console.log("Auth state change event:", event);
+      setSession(newSession);
+      setUser(newSession?.user ?? null);
+      setIsAuthenticated(!!newSession);
       
-      if (session?.user) {
-        // Fetch user profile from customers table
-        fetchUserProfile(session.user.id);
-        logActivity("Session Restored", "User session was restored");
+      if (event === 'SIGNED_IN' && newSession?.user) {
+        console.log("User signed in:", newSession.user);
+        // Defer profile fetch to avoid auth deadlock
+        setTimeout(() => {
+          fetchUserProfile(newSession.user.id);
+        }, 0);
+        logActivity("Sign In", "User signed in successfully");
+      } else if (event === 'SIGNED_OUT') {
+        logActivity("Sign Out", "User signed out");
       }
     });
 
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsAuthenticated(!!session);
+    // Then get current session
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      console.log("Current session:", currentSession);
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+      setIsAuthenticated(!!currentSession);
       
-      if (session?.user) {
-        fetchUserProfile(session.user.id);
+      if (currentSession?.user) {
+        // Defer profile fetch to avoid auth deadlock
+        setTimeout(() => {
+          fetchUserProfile(currentSession.user.id);
+        }, 0);
+        logActivity("Session Restored", "User session was restored");
       }
     });
 
@@ -108,15 +120,20 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Fetch user profile from customers table
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log("Fetching user profile for:", userId);
       const { data, error } = await supabase
         .from('customers')
         .select('*')
         .eq('id', userId)
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        return;
+      }
       
       if (data) {
+        console.log("Profile data fetched:", data);
         // Update profile with data from database
         setProfile({
           ...profile,
@@ -124,6 +141,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           email: data.email || profile.email,
           dob: data.dob || profile.dob,
         });
+        setIsProfileLoaded(true);
+      } else {
+        console.log("No profile data found for user");
       }
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -133,6 +153,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Login user
   const loginUser = async (email: string, password: string) => {
     try {
+      console.log("Attempting to log in user:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -145,7 +166,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsAuthenticated(true);
       
       if (data.user) {
-        fetchUserProfile(data.user.id);
+        console.log("Login successful for user:", data.user.id);
+        // Defer profile fetch to avoid auth deadlock
+        setTimeout(() => {
+          fetchUserProfile(data.user.id);
+        }, 0);
         logActivity("Login", "User logged in successfully");
       }
       
@@ -168,6 +193,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(null);
       setIsAuthenticated(false);
       logActivity("Logout", "User logged out");
+      setProfile(defaultProfile);
     } catch (error: any) {
       console.error("Logout error:", error);
       toast({
@@ -181,7 +207,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Update user data
   const updateUser = (userData: any) => {
     setUser(userData);
-    localStorage.setItem("bankingUser", JSON.stringify(userData));
     logActivity("User Updated", "User information was updated");
   };
 
@@ -189,13 +214,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateProfile = (profileData: Partial<UserProfile>) => {
     const updatedProfile = { ...profile, ...profileData };
     setProfile(updatedProfile);
-    localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
     
     // Also update the user name if it's changed in the profile
     if (profileData.name && user) {
       const updatedUser = { ...user, name: profileData.name };
       setUser(updatedUser);
-      localStorage.setItem("bankingUser", JSON.stringify(updatedUser));
     }
     
     logActivity("Profile Updated", "Profile information was updated");

@@ -27,6 +27,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -53,21 +54,36 @@ export function LoginForm() {
     setError(null);
     
     try {
-      const { success, error } = await loginUser(values.email, values.password);
+      // Use direct Supabase login first to check credentials
+      const { data, error: loginError } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password
+      });
       
-      if (!success && error) {
-        setError(error);
-        toast({
-          variant: "destructive",
-          title: "Login failed",
-          description: error,
-        });
+      if (loginError) {
+        console.error("Supabase login error:", loginError);
+        throw loginError;
+      }
+
+      // If direct login successful, update context
+      if (data && data.user) {
+        console.log("Login successful:", data);
+        
+        // Update user context
+        const { success, error } = await loginUser(values.email, values.password);
+        
+        if (!success && error) {
+          console.error("Context update error:", error);
+          setError(error);
+        } else {
+          toast({
+            title: "Login successful",
+            description: "Welcome back to Banking Horizon!",
+          });
+          navigate("/dashboard");
+        }
       } else {
-        toast({
-          title: "Login successful",
-          description: "Welcome back to Banking Horizon!",
-        });
-        navigate("/dashboard");
+        throw new Error("No user data returned from login");
       }
     } catch (error: any) {
       console.error("Login error:", error);

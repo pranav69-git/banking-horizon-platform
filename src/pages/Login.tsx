@@ -9,6 +9,9 @@ export default function Login() {
         <p className="text-muted-foreground">Secure banking platform for all your financial needs</p>
       </div>
       <LoginForm />
+      <div className="mt-8 text-center text-sm text-muted-foreground">
+        <p>Need an account? <a href="/register" className="text-banking-primary hover:underline">Register here</a></p>
+      </div>
     </div>
   );
 }

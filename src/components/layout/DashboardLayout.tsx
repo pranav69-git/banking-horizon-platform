@@ -13,38 +13,35 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
-  const { user, updateUser, logActivity, profile } = useUserContext();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { user, isAuthenticated, profile, logActivity } = useUserContext();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if the user is authenticated
-    const storedUser = localStorage.getItem("bankingUser");
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        if (parsedUser.isAuthenticated) {
-          setIsAuthenticated(true);
-          // Update user in context if needed
-          if (!user) {
-            updateUser(parsedUser);
-          }
-          // Log page visit
-          const pageName = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
-          logActivity("Page Visit", `Visited ${pageName} page`);
-        } else {
-          navigate("/login");
-        }
-      } catch (error) {
-        console.error("Failed to parse user data:", error);
-        navigate("/login");
+    // Check authentication status
+    const checkAuth = async () => {
+      console.log("Checking auth state:", isAuthenticated);
+      
+      if (!isAuthenticated) {
+        console.log("Not authenticated, redirecting to login");
+        navigate("/login", { replace: true });
+        return;
       }
-    } else {
-      navigate("/login");
-    }
-  }, [navigate, location.pathname, user, updateUser, logActivity]);
+      
+      // Log page visit if authenticated
+      const pageName = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
+      logActivity("Page Visit", `Visited ${pageName} page`);
+      setIsLoading(false);
+    };
+    
+    checkAuth();
+  }, [navigate, location.pathname, isAuthenticated, logActivity]);
 
-  if (!isAuthenticated) {
-    return null; // Or a loading spinner
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-banking-primary"></div>
+      </div>
+    );
   }
 
   return (
