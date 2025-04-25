@@ -25,20 +25,36 @@ export const useAuthEffects = () => {
       
       if (event === 'SIGNED_IN' && newSession?.user) {
         // Use setTimeout to avoid Supabase auth deadlock
-        setTimeout(() => {
-          fetchUserProfile(newSession.user.id).then(data => {
+        setTimeout(async () => {
+          try {
+            const data = await fetchUserProfile(newSession.user.id);
             if (data) {
               const updatedProfile = {
                 name: data.name || "",
-                email: data.email || "",
+                email: data.email || newSession.user.email || "",
                 dob: data.dob || "",
-                phone: "",
-                address: "",
-                panCard: "",
+                phone: data.phone || "",
+                address: data.address || "",
+                panCard: data.panCard || "",
               };
               setProfile(updatedProfile);
+            } else {
+              // Use email from session if no profile is found
+              setProfile(prev => ({
+                ...prev,
+                email: newSession.user.email || "",
+                name: newSession.user.email?.split('@')[0] || "User"
+              }));
             }
-          });
+          } catch (error) {
+            console.error("Error fetching profile:", error);
+            // Use default profile with email from session
+            setProfile(prev => ({
+              ...prev,
+              email: newSession.user.email || "",
+              name: newSession.user.email?.split('@')[0] || "User"
+            }));
+          }
           
           // Load activity logs
           const savedLogs = loadActivityLogs(newSession.user.id);
@@ -54,8 +70,36 @@ export const useAuthEffects = () => {
       setIsAuthenticated(!!currentSession);
       
       if (currentSession?.user) {
-        setTimeout(() => {
-          fetchUserProfile(currentSession.user.id);
+        setTimeout(async () => {
+          try {
+            const data = await fetchUserProfile(currentSession.user.id);
+            if (data) {
+              const updatedProfile = {
+                name: data.name || "",
+                email: data.email || currentSession.user.email || "",
+                dob: data.dob || "",
+                phone: data.phone || "",
+                address: data.address || "",
+                panCard: data.panCard || "",
+              };
+              setProfile(updatedProfile);
+            } else {
+              // Use email from session if no profile is found
+              setProfile(prev => ({
+                ...prev,
+                email: currentSession.user.email || "",
+                name: currentSession.user.email?.split('@')[0] || "User"
+              }));
+            }
+          } catch (error) {
+            console.error("Error fetching profile:", error);
+            // Use default profile with email from session
+            setProfile(prev => ({
+              ...prev,
+              email: currentSession.user.email || "",
+              name: currentSession.user.email?.split('@')[0] || "User"
+            }));
+          }
         }, 0);
       }
       

@@ -20,7 +20,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   useEffect(() => {
     // Check authentication status
     const checkAuth = async () => {
-      console.log("Checking auth state:", isAuthenticated);
+      console.log("Checking auth state:", isAuthenticated, "user:", user?.id);
       
       if (!isAuthenticated) {
         console.log("Not authenticated, redirecting to login");
@@ -34,13 +34,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       setIsLoading(false);
     };
     
-    // Short timeout to ensure auth state is properly set
+    // Give a moment for auth state to be properly loaded
     const timer = setTimeout(() => {
       checkAuth();
-    }, 500);
+    }, 300);
     
     return () => clearTimeout(timer);
-  }, [navigate, location.pathname, isAuthenticated, logActivity]);
+  }, [navigate, location.pathname, isAuthenticated, logActivity, user]);
 
   if (isLoading) {
     return (
