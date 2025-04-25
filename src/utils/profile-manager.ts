@@ -3,17 +3,62 @@ import { supabase } from "@/integrations/supabase/client";
 import { UserProfile } from "@/contexts/types/auth-types";
 
 export const saveProfileToStorage = (profile: UserProfile) => {
-  localStorage.setItem("userProfile", JSON.stringify(profile));
+  try {
+    localStorage.setItem("userProfile", JSON.stringify(profile));
+  } catch (e) {
+    console.error("Failed to save profile to storage:", e);
+  }
 };
 
 export const loadProfileFromStorage = (): UserProfile | null => {
-  const savedProfile = localStorage.getItem("userProfile");
-  return savedProfile ? JSON.parse(savedProfile) : null;
+  try {
+    const savedProfile = localStorage.getItem("userProfile");
+    return savedProfile ? JSON.parse(savedProfile) : null;
+  } catch (e) {
+    console.error("Failed to load profile from storage:", e);
+    return null;
+  }
 };
 
-export const fetchUserProfile = async (userId: string) => {
+export const fetchUserProfile = async (userId: string): Promise<UserProfile | null> => {
   try {
-    // First try to fetch from customers table
+    // Try to get profile from storage first for immediate display
+    const profileFromStorage = loadProfileFromStorage();
+    
+    // If we have a profile in storage with a name, use it immediately
+    if (profileFromStorage && profileFromStorage.name) {
+      // Start fetching from DB in background, but return storage data immediately
+      fetchProfileFromDB(userId).then(dbProfile => {
+        if (dbProfile) {
+          // Update storage with latest DB data
+          saveProfileToStorage({ 
+            ...profileFromStorage, 
+            ...dbProfile 
+          });
+        }
+      });
+      
+      return profileFromStorage;
+    }
+    
+    // If no usable profile in storage, fetch from DB
+    const dbProfile = await fetchProfileFromDB(userId);
+    if (dbProfile) {
+      return dbProfile;
+    }
+    
+    // Create a default profile object if nothing found
+    return null;
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    // Return profile from storage as fallback
+    return loadProfileFromStorage();
+  }
+};
+
+// Helper function to fetch profile from database
+const fetchProfileFromDB = async (userId: string): Promise<UserProfile | null> => {
+  try {
     const { data: customerData, error: customerError } = await supabase
       .from('customers')
       .select('*')
@@ -32,20 +77,10 @@ export const fetchUserProfile = async (userId: string) => {
       } as UserProfile;
     }
     
-    // If no customer record found, use profile from storage as backup
-    console.log("No customer record found, using profile from storage");
-    const profileFromStorage = loadProfileFromStorage();
-    if (profileFromStorage) {
-      return profileFromStorage;
-    }
-    
-    // Create a default profile object
     return null;
   } catch (error) {
-    console.error('Error fetching user profile:', error);
-    // Return profile from storage as fallback
-    const profileFromStorage = loadProfileFromStorage();
-    return profileFromStorage;
+    console.error('Error fetching profile from DB:', error);
+    return null;
   }
 };
 

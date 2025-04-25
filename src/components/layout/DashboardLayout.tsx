@@ -5,6 +5,7 @@ import { Sidebar } from "./Sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useUserContext } from "@/contexts/UserContext";
 import { Loader2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -20,8 +21,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   useEffect(() => {
     // Check authentication status
     const checkAuth = async () => {
-      console.log("Checking auth state:", isAuthenticated, "user:", user?.id);
-      
       if (!isAuthenticated) {
         console.log("Not authenticated, redirecting to login");
         navigate("/login", { replace: true });
@@ -31,18 +30,28 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       // Log page visit if authenticated
       const pageName = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
       logActivity("Page Visit", `Visited ${pageName} page`);
-      setIsLoading(false);
+      
+      // Set loading to false immediately if we have a profile name
+      if (profile && profile.name) {
+        setIsLoading(false);
+      }
     };
     
-    // Give a moment for auth state to be properly loaded
-    const timer = setTimeout(() => {
-      checkAuth();
-    }, 300);
+    // Execute auth check
+    checkAuth();
     
-    return () => clearTimeout(timer);
-  }, [navigate, location.pathname, isAuthenticated, logActivity, user]);
+    // Add a safety timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      if (isLoading && isAuthenticated) {
+        console.log("Safety timeout triggered, ending loading state");
+        setIsLoading(false);
+      }
+    }, 1500);
+    
+    return () => clearTimeout(timeoutId);
+  }, [navigate, location.pathname, isAuthenticated, logActivity, user, profile, isLoading]);
 
-  if (isLoading) {
+  if (isLoading && isAuthenticated) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-banking-primary mb-4" />
@@ -53,7 +62,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="min-h-screen flex bg-background">
-      <Sidebar userName={profile.name} userRole={user?.role || "customer"} />
+      <Sidebar userName={profile?.name || "User"} userRole={user?.role || "customer"} />
       <main
         className={`flex-1 transition-all duration-300 ${
           isMobile ? "ml-0" : "ml-[250px]"

@@ -19,76 +19,65 @@ export const useAuthEffects = () => {
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
       console.log("Auth state change event:", event);
+      
+      // Immediately update session and authentication state 
       setSession(newSession);
       setUser(newSession?.user ?? null);
       setIsAuthenticated(!!newSession);
       
-      if (event === 'SIGNED_IN' && newSession?.user) {
-        // Use setTimeout to avoid Supabase auth deadlock
-        setTimeout(async () => {
-          try {
-            const data = await fetchUserProfile(newSession.user.id);
+      if (newSession?.user) {
+        // Set a minimal profile immediately to ensure rendering can proceed
+        setProfile(prev => ({
+          ...prev,
+          email: newSession.user.email || "",
+          name: newSession.user.email?.split('@')[0] || "User"
+        }));
+        
+        // Fetch full profile in background
+        fetchUserProfile(newSession.user.id)
+          .then(data => {
             if (data) {
-              // data is already in UserProfile format from fetchUserProfile
               setProfile(data);
-            } else {
-              // Use email from session if no profile is found
-              setProfile(prev => ({
-                ...prev,
-                email: newSession.user.email || "",
-                name: newSession.user.email?.split('@')[0] || "User"
-              }));
             }
-          } catch (error) {
+          })
+          .catch(error => {
             console.error("Error fetching profile:", error);
-            // Use default profile with email from session
-            setProfile(prev => ({
-              ...prev,
-              email: newSession.user.email || "",
-              name: newSession.user.email?.split('@')[0] || "User"
-            }));
-          }
+          });
           
-          // Load activity logs
-          const savedLogs = loadActivityLogs(newSession.user.id);
-          setActivityLogs(savedLogs);
-        }, 0);
+        // Load activity logs
+        const savedLogs = loadActivityLogs(newSession.user.id);
+        setActivityLogs(savedLogs);
       }
     });
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      // Immediately update session state
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       setIsAuthenticated(!!currentSession);
       
+      // Set a minimal default profile
       if (currentSession?.user) {
-        setTimeout(async () => {
-          try {
-            const data = await fetchUserProfile(currentSession.user.id);
+        setProfile(prev => ({
+          ...prev,
+          email: currentSession.user.email || "",
+          name: currentSession.user.email?.split('@')[0] || "User"
+        }));
+        
+        // Fetch full profile in background
+        fetchUserProfile(currentSession.user.id)
+          .then(data => {
             if (data) {
-              // data is already in UserProfile format from fetchUserProfile
               setProfile(data);
-            } else {
-              // Use email from session if no profile is found
-              setProfile(prev => ({
-                ...prev,
-                email: currentSession.user.email || "",
-                name: currentSession.user.email?.split('@')[0] || "User"
-              }));
             }
-          } catch (error) {
+          })
+          .catch(error => {
             console.error("Error fetching profile:", error);
-            // Use default profile with email from session
-            setProfile(prev => ({
-              ...prev,
-              email: currentSession.user.email || "",
-              name: currentSession.user.email?.split('@')[0] || "User"
-            }));
-          }
-        }, 0);
+          });
       }
       
+      // Always mark loading as complete
       setIsLoading(false);
     });
 
