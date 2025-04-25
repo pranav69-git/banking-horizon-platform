@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/auth/AuthProvider";
 import { useUserContext } from "./contexts/UserContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 // Auth pages
 import Login from "./pages/Login";
@@ -32,33 +32,59 @@ import UserManagement from "./pages/admin/UserManagement";
 
 const queryClient = new QueryClient();
 
-// Protected Route Component
+// Protected Route Component with loading state
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useUserContext();
+  const [isChecking, setIsChecking] = useState(true);
   
   useEffect(() => {
     console.log("Protected route - Auth status:", isAuthenticated);
+    // Short timeout to ensure the auth state is checked
+    const timer = setTimeout(() => {
+      setIsChecking(false);
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, [isAuthenticated]);
-
+  
+  // Still checking auth status
+  if (isChecking) {
+    return null;
+  }
+  
+  // Not authenticated, redirect to login
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-
+  
   return <>{children}</>;
 };
 
 // Public Route Component (redirects to dashboard if already authenticated)
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useUserContext();
+  const [isChecking, setIsChecking] = useState(true);
   
   useEffect(() => {
     console.log("Public route - Auth status:", isAuthenticated);
+    // Short timeout to ensure the auth state is checked
+    const timer = setTimeout(() => {
+      setIsChecking(false);
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, [isAuthenticated]);
+  
+  // Still checking auth status
+  if (isChecking) {
+    return null;
+  }
 
+  // Already authenticated, redirect to dashboard
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
-
+  
   return <>{children}</>;
 };
 

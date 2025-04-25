@@ -18,24 +18,35 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simplified auth check
-    if (!isAuthenticated) {
-      console.log("Not authenticated, redirecting to login");
-      navigate("/login", { replace: true });
-      return;
-    }
+    const checkAuth = () => {
+      // If not authenticated, redirect to login immediately
+      if (!isAuthenticated) {
+        console.log("Not authenticated, redirecting to login");
+        navigate("/login", { replace: true });
+        return;
+      }
+      
+      // Log page visit only if authenticated
+      const pageName = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
+      logActivity("Page Visit", `Visited ${pageName} page`);
+      
+      // Always set loading to false after auth check
+      setIsLoading(false);
+    };
+
+    // Check authentication status immediately
+    checkAuth();
     
-    // Log page visit if authenticated
-    const pageName = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
-    logActivity("Page Visit", `Visited ${pageName} page`);
+    // Set a short timeout to ensure loading state doesn't persist
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
     
-    // Set loading to false immediately - we're authenticated
-    setIsLoading(false);
-    
+    return () => clearTimeout(timer);
   }, [navigate, location.pathname, isAuthenticated, logActivity]);
 
-  // Fast loading state - show for minimum time possible
-  if (isLoading && isAuthenticated) {
+  // Return loading state if still loading and authenticated
+  if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-banking-primary mb-4" />
@@ -44,7 +55,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     );
   }
 
-  // If authenticated and not loading, show the dashboard
+  // If not loading and authenticated, show the dashboard
   return (
     <div className="min-h-screen flex bg-background">
       <Sidebar userName={profile?.name || "User"} userRole={user?.role || "customer"} />

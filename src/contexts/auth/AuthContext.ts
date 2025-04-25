@@ -1,5 +1,5 @@
 
-import { createContext, useContext } from "react";
+import { createContext } from "react";
 import { UserContextType, defaultProfile } from "../types/auth-types";
 
 export const AuthContext = createContext<UserContextType>({
@@ -15,11 +15,3 @@ export const AuthContext = createContext<UserContextType>({
   logoutUser: async () => {},
   isAuthenticated: false,
 });
-
-export const useUserContext = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useUserContext must be used within a UserProvider");
-  }
-  return context;
-};

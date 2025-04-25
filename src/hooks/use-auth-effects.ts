@@ -17,10 +17,13 @@ export const useAuthEffects = () => {
 
   useEffect(() => {
     console.log("Setting up auth effects");
+    let isMounted = true;
     
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
       console.log("Auth state change event:", event);
+      
+      if (!isMounted) return;
       
       // Immediately update session and authentication state 
       setSession(newSession);
@@ -40,7 +43,7 @@ export const useAuthEffects = () => {
         setProfile({
           name: defaultName,
           email: email,
-          phone: "", // These fields might not exist in DB but are required by UserProfile type
+          phone: "", 
           address: "",
           dob: "",
           panCard: ""
@@ -49,6 +52,7 @@ export const useAuthEffects = () => {
         // Fetch full profile in background
         fetchUserProfile(newSession.user.id)
           .then(data => {
+            if (!isMounted) return;
             if (data) {
               setProfile(data);
             }
@@ -57,8 +61,10 @@ export const useAuthEffects = () => {
             console.error("Error fetching profile:", error);
           })
           .finally(() => {
-            // Ensure loading is complete
-            setIsLoading(false);
+            if (isMounted) {
+              // Ensure loading is complete
+              setIsLoading(false);
+            }
           });
           
         // Load activity logs
@@ -72,6 +78,8 @@ export const useAuthEffects = () => {
 
     // Check for existing session on initial load
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      if (!isMounted) return;
+      
       console.log("Initial session check:", currentSession ? "Session exists" : "No session");
       
       // Immediately update session state
@@ -92,7 +100,7 @@ export const useAuthEffects = () => {
         setProfile({
           name: defaultName,
           email: email,
-          phone: "", // These fields might not exist in DB but are required by UserProfile type
+          phone: "", 
           address: "",
           dob: "",
           panCard: ""
@@ -101,6 +109,7 @@ export const useAuthEffects = () => {
         // Fetch full profile in background
         fetchUserProfile(currentSession.user.id)
           .then(data => {
+            if (!isMounted) return;
             if (data) {
               setProfile(data);
             }
@@ -109,24 +118,31 @@ export const useAuthEffects = () => {
             console.error("Error fetching profile:", error);
           })
           .finally(() => {
-            // Ensure loading is complete
-            setIsLoading(false);
+            if (isMounted) {
+              // Ensure loading is complete
+              setIsLoading(false);
+            }
           });
       } else {
         // No session, so no need to keep loading
         setIsLoading(false);
       }
     }).catch(error => {
-      console.error("Error checking session:", error);
-      setIsLoading(false);
+      if (isMounted) {
+        console.error("Error checking session:", error);
+        setIsLoading(false);
+      }
     });
 
     // Load guest activity logs
     const guestLogs = loadActivityLogs(undefined);
-    if (guestLogs.length > 0) {
+    if (guestLogs.length > 0 && isMounted) {
       setActivityLogs(guestLogs);
     }
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, [setUser, setSession, setIsAuthenticated, setIsLoading, setProfile, setActivityLogs]);
 };
