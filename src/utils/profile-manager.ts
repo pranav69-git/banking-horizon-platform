@@ -21,7 +21,15 @@ export const fetchUserProfile = async (userId: string) => {
       .single();
     
     if (!customerError && customerData) {
-      return customerData;
+      // Map the customer data to the UserProfile structure
+      return {
+        name: customerData.name || "",
+        email: customerData.email || "",
+        dob: customerData.dob || "",
+        phone: "",  // Default value as it doesn't exist in customers table
+        address: "", // Default value as it doesn't exist in customers table
+        panCard: "" // Default value as it doesn't exist in customers table
+      } as UserProfile;
     }
     
     // If no customer record found, use profile from storage as backup
@@ -53,24 +61,32 @@ export const updateUserProfileInDB = async (
       .eq('id', userId)
       .single();
     
+    // Map UserProfile to customers table schema
+    const customerData = {
+      name: profileData.name || "",
+      email: profileData.email || "",
+      dob: profileData.dob || "",
+      acc_type: "personal" // Add required field with default value
+    };
+    
     if (checkError && checkError.code === 'PGRST116') {
       // Record doesn't exist, insert it
       const { error: insertError } = await supabase
         .from('customers')
-        .insert({ id: userId, ...profileData });
+        .insert({ id: userId, ...customerData });
         
       if (insertError) throw insertError;
     } else {
       // Record exists, update it
       const { error: updateError } = await supabase
         .from('customers')
-        .update(profileData)
+        .update(customerData)
         .eq('id', userId);
         
       if (updateError) throw updateError;
     }
     
-    // Save to local storage for backup
+    // Save to local storage for backup with all fields
     const currentProfile = loadProfileFromStorage() || {};
     saveProfileToStorage({ ...currentProfile, ...profileData } as UserProfile);
     

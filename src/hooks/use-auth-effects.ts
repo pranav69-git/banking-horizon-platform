@@ -29,15 +29,8 @@ export const useAuthEffects = () => {
           try {
             const data = await fetchUserProfile(newSession.user.id);
             if (data) {
-              const updatedProfile = {
-                name: data.name || "",
-                email: data.email || newSession.user.email || "",
-                dob: data.dob || "",
-                phone: data.phone || "",
-                address: data.address || "",
-                panCard: data.panCard || "",
-              };
-              setProfile(updatedProfile);
+              // data is already in UserProfile format from fetchUserProfile
+              setProfile(data);
             } else {
               // Use email from session if no profile is found
               setProfile(prev => ({
@@ -74,15 +67,8 @@ export const useAuthEffects = () => {
           try {
             const data = await fetchUserProfile(currentSession.user.id);
             if (data) {
-              const updatedProfile = {
-                name: data.name || "",
-                email: data.email || currentSession.user.email || "",
-                dob: data.dob || "",
-                phone: data.phone || "",
-                address: data.address || "",
-                panCard: data.panCard || "",
-              };
-              setProfile(updatedProfile);
+              // data is already in UserProfile format from fetchUserProfile
+              setProfile(data);
             } else {
               // Use email from session if no profile is found
               setProfile(prev => ({
