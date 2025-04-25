@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ProfileForm } from "@/components/profile/ProfileForm";
@@ -5,16 +6,18 @@ import { useUserContext } from "@/contexts/UserContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { toast } from "@/components/ui/toast";
+import { useToast } from "@/hooks/use-toast";
+import { UserProfile } from "@/contexts/types/auth-types";
 
 export default function ProfilePage() {
   const { user, profile, logActivity, updateProfile } = useUserContext();
+  const { toast } = useToast();
 
   useEffect(() => {
     logActivity("Profile View", "User viewed their profile page");
   }, [logActivity]);
 
-  const handleSubmit = async (data: ProfileFormData) => {
+  const handleSubmit = async (data: Partial<UserProfile>) => {
     try {
       await updateProfile(data);
       toast({
@@ -42,7 +45,7 @@ export default function ProfilePage() {
         </div>
 
         {!user?.email_confirmed_at && (
-          <Alert variant="warning" className="bg-amber-50 border-amber-200">
+          <Alert className="bg-amber-50 border-amber-200">
             <AlertCircle className="h-4 w-4 text-amber-600" />
             <AlertTitle className="text-amber-600">Email Verification Pending</AlertTitle>
             <AlertDescription className="text-amber-700">
@@ -53,7 +56,7 @@ export default function ProfilePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2">
-            <ProfileForm onSubmit={handleSubmit} />
+            <ProfileForm />
           </div>
           
           <div>

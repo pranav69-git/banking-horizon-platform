@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -28,12 +27,14 @@ const profileFormSchema = z.object({
   panCard: z.string().min(10, { message: "PAN Card number must be at least 10 characters." }),
 });
 
+export type ProfileFormValues = z.infer<typeof profileFormSchema>;
+
 export function ProfileForm() {
   const { profile, updateProfile } = useUserContext();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<z.infer<typeof profileFormSchema>>({
+  const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       name: profile.name || "",
@@ -45,7 +46,7 @@ export function ProfileForm() {
     },
   });
 
-  async function onSubmit(data: z.infer<typeof profileFormSchema>) {
+  async function onSubmit(data: ProfileFormValues) {
     setIsSubmitting(true);
     
     try {
