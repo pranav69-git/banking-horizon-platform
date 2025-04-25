@@ -5,7 +5,6 @@ import { Sidebar } from "./Sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useUserContext } from "@/contexts/UserContext";
 import { Loader2 } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -19,37 +18,23 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check authentication status
-    const checkAuth = async () => {
-      if (!isAuthenticated) {
-        console.log("Not authenticated, redirecting to login");
-        navigate("/login", { replace: true });
-        return;
-      }
-      
-      // Log page visit if authenticated
-      const pageName = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
-      logActivity("Page Visit", `Visited ${pageName} page`);
-      
-      // Set loading to false immediately after auth check passes
-      setIsLoading(false);
-    };
+    // Simplified auth check
+    if (!isAuthenticated) {
+      console.log("Not authenticated, redirecting to login");
+      navigate("/login", { replace: true });
+      return;
+    }
     
-    // Execute auth check
-    checkAuth();
+    // Log page visit if authenticated
+    const pageName = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
+    logActivity("Page Visit", `Visited ${pageName} page`);
     
-    // Add a shorter timeout to prevent long loading times
-    const timeoutId = setTimeout(() => {
-      if (isLoading) {
-        console.log("Loading timeout triggered, showing dashboard anyway");
-        setIsLoading(false);
-      }
-    }, 1000); // Reduced from 1500ms to 1000ms
+    // Set loading to false immediately - we're authenticated
+    setIsLoading(false);
     
-    return () => clearTimeout(timeoutId);
-  }, [navigate, location.pathname, isAuthenticated, logActivity, isLoading]);
+  }, [navigate, location.pathname, isAuthenticated, logActivity]);
 
-  // Simple loading state - show for minimum time possible
+  // Fast loading state - show for minimum time possible
   if (isLoading && isAuthenticated) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
@@ -59,6 +44,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     );
   }
 
+  // If authenticated and not loading, show the dashboard
   return (
     <div className="min-h-screen flex bg-background">
       <Sidebar userName={profile?.name || "User"} userRole={user?.role || "customer"} />

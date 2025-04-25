@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchUserProfile } from "@/utils/profile-manager";
@@ -24,7 +25,11 @@ export const useAuthEffects = () => {
       // Immediately update session and authentication state 
       setSession(newSession);
       setUser(newSession?.user ?? null);
-      setIsAuthenticated(!!newSession);
+      
+      // Important: Set authentication state immediately
+      const isAuth = !!newSession;
+      setIsAuthenticated(isAuth);
+      console.log("Authentication state set to:", isAuth);
       
       if (newSession?.user) {
         // Always set a minimal profile immediately to ensure rendering can proceed
@@ -35,7 +40,7 @@ export const useAuthEffects = () => {
         setProfile({
           name: defaultName,
           email: email,
-          phone: "",
+          phone: "", // These fields might not exist in DB but are required by UserProfile type
           address: "",
           dob: "",
           panCard: ""
@@ -59,15 +64,24 @@ export const useAuthEffects = () => {
         // Load activity logs
         const savedLogs = loadActivityLogs(newSession.user.id);
         setActivityLogs(savedLogs);
+      } else {
+        // No user in session, ensure loading is complete
+        setIsLoading(false);
       }
     });
 
-    // Check for existing session
+    // Check for existing session on initial load
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      console.log("Initial session check:", currentSession ? "Session exists" : "No session");
+      
       // Immediately update session state
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
-      setIsAuthenticated(!!currentSession);
+      
+      // Important: Set authentication state immediately
+      const isAuth = !!currentSession;
+      setIsAuthenticated(isAuth);
+      console.log("Initial authentication state set to:", isAuth);
       
       // Set a minimal default profile
       if (currentSession?.user) {
@@ -78,7 +92,7 @@ export const useAuthEffects = () => {
         setProfile({
           name: defaultName,
           email: email,
-          phone: "",
+          phone: "", // These fields might not exist in DB but are required by UserProfile type
           address: "",
           dob: "",
           panCard: ""
@@ -102,6 +116,9 @@ export const useAuthEffects = () => {
         // No session, so no need to keep loading
         setIsLoading(false);
       }
+    }).catch(error => {
+      console.error("Error checking session:", error);
+      setIsLoading(false);
     });
 
     // Load guest activity logs

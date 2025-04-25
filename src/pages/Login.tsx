@@ -1,7 +1,20 @@
 
+import { useEffect } from "react";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { useUserContext } from "@/contexts/UserContext";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
+  const { isAuthenticated } = useUserContext();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log("Already authenticated, redirecting to dashboard");
+      navigate("/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-white to-blue-50 p-4">
       <div className="mb-8 text-center">
