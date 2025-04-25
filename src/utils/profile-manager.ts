@@ -36,6 +36,8 @@ export const fetchUserProfile = async (userId: string): Promise<UserProfile | nu
             ...dbProfile 
           });
         }
+      }).catch(err => {
+        console.error("Background profile fetch failed:", err);
       });
       
       return profileFromStorage;
@@ -44,15 +46,41 @@ export const fetchUserProfile = async (userId: string): Promise<UserProfile | nu
     // If no usable profile in storage, fetch from DB
     const dbProfile = await fetchProfileFromDB(userId);
     if (dbProfile) {
+      // Save to storage for future use
+      saveProfileToStorage(dbProfile);
       return dbProfile;
     }
     
     // Create a default profile object if nothing found
-    return null;
+    const defaultProfile: UserProfile = {
+      name: "User",
+      email: "",
+      phone: "",
+      address: "",
+      dob: "",
+      panCard: ""
+    };
+
+    // Save the default to storage
+    saveProfileToStorage(defaultProfile);
+    return defaultProfile;
+    
   } catch (error) {
     console.error('Error fetching user profile:', error);
-    // Return profile from storage as fallback
-    return loadProfileFromStorage();
+    
+    // Create a default profile as fallback
+    const defaultProfile: UserProfile = {
+      name: "User",
+      email: "",
+      phone: "",
+      address: "",
+      dob: "",
+      panCard: ""
+    };
+    
+    // Save the default to storage
+    saveProfileToStorage(defaultProfile);
+    return defaultProfile;
   }
 };
 
@@ -74,7 +102,7 @@ const fetchProfileFromDB = async (userId: string): Promise<UserProfile | null> =
         phone: "",  // Default value as it doesn't exist in customers table
         address: "", // Default value as it doesn't exist in customers table
         panCard: "" // Default value as it doesn't exist in customers table
-      } as UserProfile;
+      };
     }
     
     return null;
@@ -97,7 +125,7 @@ export const updateUserProfileInDB = async (
       .single();
     
     // Map UserProfile to customers table schema
-    const customerData = {
+    const customerData: any = {
       name: profileData.name || "",
       email: profileData.email || "",
       dob: profileData.dob || "",
@@ -108,7 +136,7 @@ export const updateUserProfileInDB = async (
       // Record doesn't exist, insert it
       const { error: insertError } = await supabase
         .from('customers')
-        .insert({ id: userId, ...customerData });
+        .insert([{ id: userId, ...customerData }]);
         
       if (insertError) throw insertError;
     } else {

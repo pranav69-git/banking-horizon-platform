@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchUserProfile } from "@/utils/profile-manager";
@@ -16,6 +15,8 @@ export const useAuthEffects = () => {
   } = useAuthState();
 
   useEffect(() => {
+    console.log("Setting up auth effects");
+    
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
       console.log("Auth state change event:", event);
@@ -26,12 +27,19 @@ export const useAuthEffects = () => {
       setIsAuthenticated(!!newSession);
       
       if (newSession?.user) {
-        // Set a minimal profile immediately to ensure rendering can proceed
-        setProfile(prev => ({
-          ...prev,
-          email: newSession.user.email || "",
-          name: newSession.user.email?.split('@')[0] || "User"
-        }));
+        // Always set a minimal profile immediately to ensure rendering can proceed
+        const email = newSession.user.email || "";
+        const defaultName = email ? email.split('@')[0] : "User";
+        
+        // Set minimal profile immediately
+        setProfile({
+          name: defaultName,
+          email: email,
+          phone: "",
+          address: "",
+          dob: "",
+          panCard: ""
+        });
         
         // Fetch full profile in background
         fetchUserProfile(newSession.user.id)
@@ -42,6 +50,10 @@ export const useAuthEffects = () => {
           })
           .catch(error => {
             console.error("Error fetching profile:", error);
+          })
+          .finally(() => {
+            // Ensure loading is complete
+            setIsLoading(false);
           });
           
         // Load activity logs
@@ -59,11 +71,18 @@ export const useAuthEffects = () => {
       
       // Set a minimal default profile
       if (currentSession?.user) {
-        setProfile(prev => ({
-          ...prev,
-          email: currentSession.user.email || "",
-          name: currentSession.user.email?.split('@')[0] || "User"
-        }));
+        const email = currentSession.user.email || "";
+        const defaultName = email ? email.split('@')[0] : "User";
+        
+        // Set minimal profile immediately
+        setProfile({
+          name: defaultName,
+          email: email,
+          phone: "",
+          address: "",
+          dob: "",
+          panCard: ""
+        });
         
         // Fetch full profile in background
         fetchUserProfile(currentSession.user.id)
@@ -74,11 +93,15 @@ export const useAuthEffects = () => {
           })
           .catch(error => {
             console.error("Error fetching profile:", error);
+          })
+          .finally(() => {
+            // Ensure loading is complete
+            setIsLoading(false);
           });
+      } else {
+        // No session, so no need to keep loading
+        setIsLoading(false);
       }
-      
-      // Always mark loading as complete
-      setIsLoading(false);
     });
 
     // Load guest activity logs

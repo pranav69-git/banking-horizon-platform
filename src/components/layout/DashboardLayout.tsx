@@ -31,26 +31,25 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       const pageName = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
       logActivity("Page Visit", `Visited ${pageName} page`);
       
-      // Set loading to false immediately if we have a profile name
-      if (profile && profile.name) {
-        setIsLoading(false);
-      }
+      // Set loading to false immediately after auth check passes
+      setIsLoading(false);
     };
     
     // Execute auth check
     checkAuth();
     
-    // Add a safety timeout to prevent infinite loading
+    // Add a shorter timeout to prevent long loading times
     const timeoutId = setTimeout(() => {
-      if (isLoading && isAuthenticated) {
-        console.log("Safety timeout triggered, ending loading state");
+      if (isLoading) {
+        console.log("Loading timeout triggered, showing dashboard anyway");
         setIsLoading(false);
       }
-    }, 1500);
+    }, 1000); // Reduced from 1500ms to 1000ms
     
     return () => clearTimeout(timeoutId);
-  }, [navigate, location.pathname, isAuthenticated, logActivity, user, profile, isLoading]);
+  }, [navigate, location.pathname, isAuthenticated, logActivity, isLoading]);
 
+  // Simple loading state - show for minimum time possible
   if (isLoading && isAuthenticated) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
