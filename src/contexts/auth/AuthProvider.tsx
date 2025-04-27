@@ -17,11 +17,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     profile,
     activityLogs,
     isAuthenticated,
+    isLoading,
     setUser,
     setSession,
     setProfile,
     setActivityLogs,
     setIsAuthenticated,
+    setIsLoading,
   } = useAuthState();
 
   // Set up auth effects
@@ -98,7 +100,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         getRecentActivities: (limit = 10) => activityLogs.slice(0, limit),
         loginUser: handleLogin,
         logoutUser: handleLogout,
-        isAuthenticated
+        isAuthenticated,
+        isLoading // Added isLoading to the context value
       }}
     >
       {children}

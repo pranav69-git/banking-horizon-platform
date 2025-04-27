@@ -14,4 +14,5 @@ export const AuthContext = createContext<UserContextType>({
   loginUser: async () => ({ success: false }),
   logoutUser: async () => {},
   isAuthenticated: false,
+  isLoading: true, // Added with a default value of true
 });

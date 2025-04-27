@@ -30,6 +30,7 @@ export type UserContextType = {
   loginUser: (email: string, password: string) => Promise<{ success: boolean, error?: string }>;
   logoutUser: () => Promise<void>;
   isAuthenticated: boolean;
+  isLoading: boolean; // Added the missing isLoading property
 };
 
 export const defaultProfile: UserProfile = {
