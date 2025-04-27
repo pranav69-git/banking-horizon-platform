@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/auth/AuthProvider";
 import { useUserContext } from "./contexts/UserContext";
 import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 
 // Auth pages
 import Login from "./pages/Login";
@@ -32,13 +33,13 @@ import UserManagement from "./pages/admin/UserManagement";
 
 const queryClient = new QueryClient();
 
-// Protected Route Component with loading state
+// Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useUserContext();
   const [isChecking, setIsChecking] = useState(true);
   
   useEffect(() => {
-    console.log("Protected route - Auth status:", isAuthenticated);
+    console.log("Protected route check - Auth state:", isAuthenticated);
     // Short timeout to ensure the auth state is checked
     const timer = setTimeout(() => {
       setIsChecking(false);
@@ -47,26 +48,29 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return () => clearTimeout(timer);
   }, [isAuthenticated]);
   
-  // Still checking auth status
   if (isChecking) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-banking-primary" />
+      </div>
+    );
   }
   
-  // Not authenticated, redirect to login
   if (!isAuthenticated) {
+    console.log("Protected route - Not authenticated, redirecting to login");
     return <Navigate to="/login" replace />;
   }
   
   return <>{children}</>;
 };
 
-// Public Route Component (redirects to dashboard if already authenticated)
+// Public Route Component
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useUserContext();
   const [isChecking, setIsChecking] = useState(true);
   
   useEffect(() => {
-    console.log("Public route - Auth status:", isAuthenticated);
+    console.log("Public route check - Auth state:", isAuthenticated);
     // Short timeout to ensure the auth state is checked
     const timer = setTimeout(() => {
       setIsChecking(false);
@@ -75,13 +79,16 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     return () => clearTimeout(timer);
   }, [isAuthenticated]);
   
-  // Still checking auth status
   if (isChecking) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-banking-primary" />
+      </div>
+    );
   }
 
-  // Already authenticated, redirect to dashboard
   if (isAuthenticated) {
+    console.log("Public route - Already authenticated, redirecting to dashboard");
     return <Navigate to="/dashboard" replace />;
   }
   

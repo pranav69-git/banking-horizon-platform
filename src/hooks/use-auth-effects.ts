@@ -19,27 +19,27 @@ export const useAuthEffects = () => {
     console.log("Setting up auth effects");
     let isMounted = true;
     
-    // Set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
-      console.log("Auth state change event:", event);
-      
+    // Function to update auth state
+    const updateAuthState = (newSession: any) => {
       if (!isMounted) return;
       
-      // Immediately update session and authentication state 
+      console.log("Updating auth state with session:", newSession ? "exists" : "none");
+      
+      // Update user and session
       setSession(newSession);
       setUser(newSession?.user ?? null);
       
-      // Important: Set authentication state immediately
-      const isAuth = !!newSession;
+      // Critical: Set authentication state immediately
+      const isAuth = !!newSession?.user;
       setIsAuthenticated(isAuth);
       console.log("Authentication state set to:", isAuth);
       
       if (newSession?.user) {
-        // Always set a minimal profile immediately to ensure rendering can proceed
+        // Get email from session
         const email = newSession.user.email || "";
         const defaultName = email ? email.split('@')[0] : "User";
         
-        // Set minimal profile immediately
+        // Set minimal profile immediately to avoid rendering issues
         setProfile({
           name: defaultName,
           email: email,
@@ -49,7 +49,7 @@ export const useAuthEffects = () => {
           panCard: ""
         });
         
-        // Fetch full profile in background
+        // Then fetch complete profile
         fetchUserProfile(newSession.user.id)
           .then(data => {
             if (!isMounted) return;
@@ -62,83 +62,34 @@ export const useAuthEffects = () => {
           })
           .finally(() => {
             if (isMounted) {
-              // Ensure loading is complete
               setIsLoading(false);
             }
           });
-          
+        
         // Load activity logs
         const savedLogs = loadActivityLogs(newSession.user.id);
         setActivityLogs(savedLogs);
       } else {
-        // No user in session, ensure loading is complete
         setIsLoading(false);
       }
+    };
+    
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+      console.log("Auth state change event:", event);
+      updateAuthState(newSession);
     });
 
-    // Check for existing session on initial load
+    // Get initial session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      if (!isMounted) return;
-      
       console.log("Initial session check:", currentSession ? "Session exists" : "No session");
-      
-      // Immediately update session state
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      
-      // Important: Set authentication state immediately
-      const isAuth = !!currentSession;
-      setIsAuthenticated(isAuth);
-      console.log("Initial authentication state set to:", isAuth);
-      
-      // Set a minimal default profile
-      if (currentSession?.user) {
-        const email = currentSession.user.email || "";
-        const defaultName = email ? email.split('@')[0] : "User";
-        
-        // Set minimal profile immediately
-        setProfile({
-          name: defaultName,
-          email: email,
-          phone: "", 
-          address: "",
-          dob: "",
-          panCard: ""
-        });
-        
-        // Fetch full profile in background
-        fetchUserProfile(currentSession.user.id)
-          .then(data => {
-            if (!isMounted) return;
-            if (data) {
-              setProfile(data);
-            }
-          })
-          .catch(error => {
-            console.error("Error fetching profile:", error);
-          })
-          .finally(() => {
-            if (isMounted) {
-              // Ensure loading is complete
-              setIsLoading(false);
-            }
-          });
-      } else {
-        // No session, so no need to keep loading
-        setIsLoading(false);
-      }
+      updateAuthState(currentSession);
     }).catch(error => {
       if (isMounted) {
         console.error("Error checking session:", error);
         setIsLoading(false);
       }
     });
-
-    // Load guest activity logs
-    const guestLogs = loadActivityLogs(undefined);
-    if (guestLogs.length > 0 && isMounted) {
-      setActivityLogs(guestLogs);
-    }
 
     return () => {
       isMounted = false;

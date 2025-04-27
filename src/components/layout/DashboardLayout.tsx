@@ -18,29 +18,20 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = () => {
-      // If not authenticated, redirect to login immediately
+    console.log("DashboardLayout - Auth state:", isAuthenticated);
+    
+    // Very short timeout to ensure auth state is up-to-date
+    const timer = setTimeout(() => {
       if (!isAuthenticated) {
         console.log("Not authenticated, redirecting to login");
         navigate("/login", { replace: true });
-        return;
+      } else {
+        // Log page visit if authenticated
+        const pageName = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
+        logActivity("Page Visit", `Visited ${pageName} page`);
+        setIsLoading(false);
       }
-      
-      // Log page visit only if authenticated
-      const pageName = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
-      logActivity("Page Visit", `Visited ${pageName} page`);
-      
-      // Always set loading to false after auth check
-      setIsLoading(false);
-    };
-
-    // Check authentication status immediately
-    checkAuth();
-    
-    // Set a short timeout to ensure loading state doesn't persist
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
+    }, 50);
     
     return () => clearTimeout(timer);
   }, [navigate, location.pathname, isAuthenticated, logActivity]);
@@ -55,10 +46,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     );
   }
 
-  // If not loading and authenticated, show the dashboard
+  // If authenticated, show the dashboard
   return (
     <div className="min-h-screen flex bg-background">
-      <Sidebar userName={profile?.name || "User"} userRole={user?.role || "customer"} />
+      <Sidebar 
+        userName={profile?.name || "User"} 
+        userRole={user?.role || "customer"} 
+      />
       <main
         className={`flex-1 transition-all duration-300 ${
           isMobile ? "ml-0" : "ml-[250px]"

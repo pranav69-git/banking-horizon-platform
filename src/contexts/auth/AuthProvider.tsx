@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { AuthContext } from "./AuthContext";
 import { useAuthState } from "@/hooks/use-auth-state";
@@ -17,8 +17,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     profile,
     activityLogs,
     isAuthenticated,
+    setUser,
+    setSession,
     setProfile,
     setActivityLogs,
+    setIsAuthenticated,
   } = useAuthState();
 
   // Set up auth effects
@@ -55,6 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const handleLogin = async (email: string, password: string) => {
     const result = await loginWithEmail(email, password);
     if (result.success) {
+      setIsAuthenticated(true); // Explicitly set authentication state
       logActivity("Login", "User logged in successfully");
       return { success: true };
     }
@@ -76,6 +80,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Logout failed",
         description: result.error
       });
+    } else {
+      setIsAuthenticated(false); // Explicitly clear authentication state
     }
   };
 
