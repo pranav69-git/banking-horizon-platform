@@ -48,6 +48,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     console.log("Protected route check - Auth state:", isAuthenticated, "Loading:", isLoading);
   }, [isAuthenticated, isLoading]);
   
+  // During loading, show skeleton UI instead of redirecting
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col space-y-4 items-center justify-center p-4">
@@ -58,6 +59,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
+  // After loading completes, redirect if not authenticated
   if (!isAuthenticated) {
     console.log("Protected route - Not authenticated, redirecting to login");
     return <Navigate to="/login" replace />;
@@ -74,12 +76,13 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     console.log("Public route check - Auth state:", isAuthenticated, "Loading:", isLoading);
   }, [isAuthenticated, isLoading]);
   
-  // Always render children for public routes during loading
-  // This ensures login page shows up while checking auth
+  // During loading or authentication check, always show the children
+  // This ensures login page always shows immediately
   if (isLoading) {
     return <>{children}</>;
   }
 
+  // Only after loading completes, redirect if authenticated
   if (isAuthenticated) {
     console.log("Public route - Already authenticated, redirecting to dashboard");
     return <Navigate to="/dashboard" replace />;
@@ -91,8 +94,15 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* Redirect root to login */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      {/* Redirect root to login or dashboard based on auth state */}
+      <Route 
+        path="/" 
+        element={
+          <PublicRoute>
+            <Navigate to="/login" replace />
+          </PublicRoute>
+        } 
+      />
       
       {/* Auth Routes - Public routes */}
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />

@@ -14,24 +14,38 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
-  const { user, isAuthenticated, profile, logActivity } = useUserContext();
+  const { user, isAuthenticated, isLoading, profile, logActivity } = useUserContext();
 
   useEffect(() => {
-    console.log("DashboardLayout - Auth state:", isAuthenticated);
+    console.log("DashboardLayout - Auth state:", isAuthenticated, "Loading:", isLoading);
     
-    if (!isAuthenticated) {
-      console.log("Not authenticated, redirecting to login");
+    // Only redirect if not loading and not authenticated
+    if (!isLoading && !isAuthenticated) {
+      console.log("Not authenticated and not loading, redirecting to login");
       navigate("/login", { replace: true });
       return;
     }
     
     // Log page visit if authenticated
-    const pageName = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
-    logActivity("Page Visit", `Visited ${pageName} page`);
+    if (isAuthenticated && !isLoading) {
+      const pageName = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
+      logActivity("Page Visit", `Visited ${pageName} page`);
+    }
     
-  }, [navigate, location.pathname, isAuthenticated, logActivity]);
+  }, [navigate, location.pathname, isAuthenticated, isLoading, logActivity]);
 
-  // If not authenticated, don't render anything - the redirect will happen
+  // If still loading, show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-banking-primary mb-4" />
+        <p className="text-banking-primary">Loading your dashboard...</p>
+      </div>
+    );
+  }
+
+  // If not authenticated and not loading, the redirect will happen
+  // This shouldn't render, but added as a safety
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
@@ -41,7 +55,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     );
   }
 
-  // If authenticated, show the dashboard
+  // If authenticated and not loading, show the dashboard
   return (
     <div className="min-h-screen flex bg-background">
       <Sidebar 

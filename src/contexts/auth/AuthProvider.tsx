@@ -31,10 +31,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Log activity and update state
   const logActivity = (action: string, details: string) => {
-    const newLog = createActivityLog(action, details, user?.id);
+    if (!user?.id) return;
+    
+    const newLog = createActivityLog(action, details, user.id);
     const updatedLogs = [newLog, ...activityLogs];
     setActivityLogs(updatedLogs);
-    saveActivityLogs(user?.id, updatedLogs);
+    saveActivityLogs(user.id, updatedLogs);
     console.log("Activity logged:", action, details);
   };
 
@@ -58,12 +60,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Login handler
   const handleLogin = async (email: string, password: string) => {
+    setIsLoading(true);
     const result = await loginWithEmail(email, password);
     if (result.success) {
       setIsAuthenticated(true); // Explicitly set authentication state
       logActivity("Login", "User logged in successfully");
       return { success: true };
     }
+    setIsLoading(false);
     return { success: false, error: result.error };
   };
 
@@ -101,7 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loginUser: handleLogin,
         logoutUser: handleLogout,
         isAuthenticated,
-        isLoading // Added isLoading to the context value
+        isLoading
       }}
     >
       {children}

@@ -5,15 +5,13 @@ import { useUserContext } from "@/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-  const { isAuthenticated } = useUserContext();
+  const { isAuthenticated, isLoading } = useUserContext();
   const navigate = useNavigate();
 
-  // Removed checkingAuth state and useEffect to simplify the flow
-  // The PublicRoute wrapper will handle authentication redirects
-
-  console.log("Login page - Authentication state:", isAuthenticated);
+  console.log("Login page - Authentication state:", isAuthenticated, "Loading:", isLoading);
 
   // Show login form immediately without any loading indicators
+  // PublicRoute component in App.tsx will handle redirects if already authenticated
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-white to-blue-50 p-4">
       <div className="mb-8 text-center">

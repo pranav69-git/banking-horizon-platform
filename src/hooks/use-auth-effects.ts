@@ -23,16 +23,16 @@ export const useAuthEffects = () => {
     setIsLoading(true);
     
     // Function to update auth state
-    const updateAuthState = (newSession: any) => {
+    const updateAuthState = async (newSession: any) => {
       if (!isMounted) return;
       
       console.log("Updating auth state with session:", newSession ? "exists" : "none");
       
-      // Update session first
+      // Update session and user
       setSession(newSession);
       setUser(newSession?.user ?? null);
       
-      // Critical: Set authentication state immediately
+      // Set authentication state
       const isAuth = !!newSession?.user;
       setIsAuthenticated(isAuth);
       console.log("Authentication state set to:", isAuth);
@@ -52,25 +52,24 @@ export const useAuthEffects = () => {
           panCard: ""
         });
         
-        // Then fetch complete profile in background
-        fetchUserProfile(newSession.user.id)
-          .then(data => {
-            if (!isMounted) return;
-            if (data) {
-              setProfile(data);
-            }
-            // Move setIsLoading here after profile is fetched
+        try {
+          // Then fetch complete profile in background
+          const data = await fetchUserProfile(newSession.user.id);
+          if (isMounted && data) {
+            setProfile(data);
+          }
+          
+          // Load activity logs
+          const savedLogs = loadActivityLogs(newSession.user.id);
+          setActivityLogs(savedLogs);
+        } catch (error) {
+          console.error("Error fetching profile:", error);
+        } finally {
+          // Always set loading to false after all operations are complete
+          if (isMounted) {
             setIsLoading(false);
-          })
-          .catch(error => {
-            console.error("Error fetching profile:", error);
-            // Ensure loading state is set to false even on error
-            setIsLoading(false);
-          });
-        
-        // Load activity logs
-        const savedLogs = loadActivityLogs(newSession.user.id);
-        setActivityLogs(savedLogs);
+          }
+        }
       } else {
         // Not authenticated, set loading to false immediately
         setIsLoading(false);
