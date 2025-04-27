@@ -7,8 +7,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/auth/AuthProvider";
 import { useUserContext } from "./contexts/UserContext";
-import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
+import { Skeleton } from "./components/ui/skeleton";
 
 // Auth pages
 import Login from "./pages/Login";
@@ -31,27 +31,29 @@ import ActivityLogsPage from "./pages/activity/ActivityLogsPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 30000,
+    },
+  },
+});
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useUserContext();
-  const [isChecking, setIsChecking] = useState(true);
+  const { isAuthenticated, isLoading } = useUserContext();
   
   useEffect(() => {
-    console.log("Protected route check - Auth state:", isAuthenticated);
-    // Short timeout to ensure the auth state is checked
-    const timer = setTimeout(() => {
-      setIsChecking(false);
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  }, [isAuthenticated]);
+    console.log("Protected route check - Auth state:", isAuthenticated, "Loading:", isLoading);
+  }, [isAuthenticated, isLoading]);
   
-  if (isChecking) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-banking-primary" />
+      <div className="min-h-screen flex flex-col space-y-4 items-center justify-center p-4">
+        <Skeleton className="h-12 w-12 rounded-full bg-banking-primary/30" />
+        <Skeleton className="h-4 w-[200px] bg-banking-primary/20" />
+        <Skeleton className="h-4 w-[150px] bg-banking-primary/20" />
       </div>
     );
   }
@@ -66,23 +68,16 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Public Route Component
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useUserContext();
-  const [isChecking, setIsChecking] = useState(true);
+  const { isAuthenticated, isLoading } = useUserContext();
   
   useEffect(() => {
-    console.log("Public route check - Auth state:", isAuthenticated);
-    // Short timeout to ensure the auth state is checked
-    const timer = setTimeout(() => {
-      setIsChecking(false);
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  }, [isAuthenticated]);
+    console.log("Public route check - Auth state:", isAuthenticated, "Loading:", isLoading);
+  }, [isAuthenticated, isLoading]);
   
-  if (isChecking) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-banking-primary" />
+        <Skeleton className="h-8 w-8 rounded-full bg-banking-primary/30" />
       </div>
     );
   }

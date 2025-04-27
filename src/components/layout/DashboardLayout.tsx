@@ -20,24 +20,20 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   useEffect(() => {
     console.log("DashboardLayout - Auth state:", isAuthenticated);
     
-    // Very short timeout to ensure auth state is up-to-date
-    const timer = setTimeout(() => {
-      if (!isAuthenticated) {
-        console.log("Not authenticated, redirecting to login");
-        navigate("/login", { replace: true });
-      } else {
-        // Log page visit if authenticated
-        const pageName = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
-        logActivity("Page Visit", `Visited ${pageName} page`);
-        setIsLoading(false);
-      }
-    }, 50);
+    if (!isAuthenticated) {
+      console.log("Not authenticated, redirecting to login");
+      navigate("/login", { replace: true });
+    } else {
+      // Log page visit if authenticated
+      const pageName = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
+      logActivity("Page Visit", `Visited ${pageName} page`);
+      setIsLoading(false);
+    }
     
-    return () => clearTimeout(timer);
   }, [navigate, location.pathname, isAuthenticated, logActivity]);
 
   // Return loading state if still loading and authenticated
-  if (isLoading) {
+  if (isLoading && isAuthenticated) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-banking-primary mb-4" />

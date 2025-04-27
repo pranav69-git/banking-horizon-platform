@@ -48,27 +48,27 @@ export const useAuthEffects = () => {
           dob: "",
           panCard: ""
         });
+        setIsLoading(false);
         
-        // Then fetch complete profile
-        fetchUserProfile(newSession.user.id)
-          .then(data => {
-            if (!isMounted) return;
-            if (data) {
-              setProfile(data);
-            }
-          })
-          .catch(error => {
-            console.error("Error fetching profile:", error);
-          })
-          .finally(() => {
-            if (isMounted) {
-              setIsLoading(false);
-            }
-          });
-        
-        // Load activity logs
-        const savedLogs = loadActivityLogs(newSession.user.id);
-        setActivityLogs(savedLogs);
+        // Then fetch complete profile in background
+        setTimeout(() => {
+          if (!isMounted) return;
+          
+          fetchUserProfile(newSession.user.id)
+            .then(data => {
+              if (!isMounted) return;
+              if (data) {
+                setProfile(data);
+              }
+            })
+            .catch(error => {
+              console.error("Error fetching profile:", error);
+            });
+          
+          // Load activity logs
+          const savedLogs = loadActivityLogs(newSession.user.id);
+          setActivityLogs(savedLogs);
+        }, 0);
       } else {
         setIsLoading(false);
       }
@@ -80,7 +80,7 @@ export const useAuthEffects = () => {
       updateAuthState(newSession);
     });
 
-    // Get initial session
+    // Get initial session - do this immediately
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       console.log("Initial session check:", currentSession ? "Session exists" : "No session");
       updateAuthState(currentSession);

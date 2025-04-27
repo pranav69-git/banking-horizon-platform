@@ -12,15 +12,12 @@ export default function Login() {
 
   useEffect(() => {
     console.log("Login page - Authentication state:", isAuthenticated);
-    const timer = setTimeout(() => {
-      setCheckingAuth(false);
-      if (isAuthenticated) {
-        console.log("Already authenticated, redirecting to dashboard");
-        navigate("/dashboard", { replace: true });
-      }
-    }, 100);
-    
-    return () => clearTimeout(timer);
+    // Check authentication immediately
+    setCheckingAuth(false);
+    if (isAuthenticated) {
+      console.log("Already authenticated, redirecting to dashboard");
+      navigate("/dashboard", { replace: true });
+    }
   }, [isAuthenticated, navigate]);
 
   // Show loading state while checking authentication
