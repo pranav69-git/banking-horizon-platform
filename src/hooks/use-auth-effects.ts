@@ -19,13 +19,16 @@ export const useAuthEffects = () => {
     console.log("Setting up auth effects");
     let isMounted = true;
     
+    // Set loading state to true at the beginning
+    setIsLoading(true);
+    
     // Function to update auth state
     const updateAuthState = (newSession: any) => {
       if (!isMounted) return;
       
       console.log("Updating auth state with session:", newSession ? "exists" : "none");
       
-      // Update user and session
+      // Update session first
       setSession(newSession);
       setUser(newSession?.user ?? null);
       
@@ -48,28 +51,28 @@ export const useAuthEffects = () => {
           dob: "",
           panCard: ""
         });
-        setIsLoading(false);
         
         // Then fetch complete profile in background
-        setTimeout(() => {
-          if (!isMounted) return;
-          
-          fetchUserProfile(newSession.user.id)
-            .then(data => {
-              if (!isMounted) return;
-              if (data) {
-                setProfile(data);
-              }
-            })
-            .catch(error => {
-              console.error("Error fetching profile:", error);
-            });
-          
-          // Load activity logs
-          const savedLogs = loadActivityLogs(newSession.user.id);
-          setActivityLogs(savedLogs);
-        }, 0);
+        fetchUserProfile(newSession.user.id)
+          .then(data => {
+            if (!isMounted) return;
+            if (data) {
+              setProfile(data);
+            }
+            // Move setIsLoading here after profile is fetched
+            setIsLoading(false);
+          })
+          .catch(error => {
+            console.error("Error fetching profile:", error);
+            // Ensure loading state is set to false even on error
+            setIsLoading(false);
+          });
+        
+        // Load activity logs
+        const savedLogs = loadActivityLogs(newSession.user.id);
+        setActivityLogs(savedLogs);
       } else {
+        // Not authenticated, set loading to false immediately
         setIsLoading(false);
       }
     };

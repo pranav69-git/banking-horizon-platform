@@ -74,12 +74,10 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     console.log("Public route check - Auth state:", isAuthenticated, "Loading:", isLoading);
   }, [isAuthenticated, isLoading]);
   
+  // Always render children for public routes during loading
+  // This ensures login page shows up while checking auth
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Skeleton className="h-8 w-8 rounded-full bg-banking-primary/30" />
-      </div>
-    );
+    return <>{children}</>;
   }
 
   if (isAuthenticated) {

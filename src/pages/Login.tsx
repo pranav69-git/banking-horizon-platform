@@ -1,35 +1,19 @@
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { useUserContext } from "@/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
-import { Loader2 } from "lucide-react";
 
 export default function Login() {
   const { isAuthenticated } = useUserContext();
   const navigate = useNavigate();
-  const [checkingAuth, setCheckingAuth] = useState(true);
 
-  useEffect(() => {
-    console.log("Login page - Authentication state:", isAuthenticated);
-    // Check authentication immediately
-    setCheckingAuth(false);
-    if (isAuthenticated) {
-      console.log("Already authenticated, redirecting to dashboard");
-      navigate("/dashboard", { replace: true });
-    }
-  }, [isAuthenticated, navigate]);
+  // Removed checkingAuth state and useEffect to simplify the flow
+  // The PublicRoute wrapper will handle authentication redirects
 
-  // Show loading state while checking authentication
-  if (checkingAuth) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-banking-primary" />
-      </div>
-    );
-  }
+  console.log("Login page - Authentication state:", isAuthenticated);
 
-  // Only show login form if not authenticated
+  // Show login form immediately without any loading indicators
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-white to-blue-50 p-4">
       <div className="mb-8 text-center">

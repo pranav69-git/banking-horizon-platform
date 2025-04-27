@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -15,7 +15,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const location = useLocation();
   const isMobile = useIsMobile();
   const { user, isAuthenticated, profile, logActivity } = useUserContext();
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     console.log("DashboardLayout - Auth state:", isAuthenticated);
@@ -23,21 +22,21 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     if (!isAuthenticated) {
       console.log("Not authenticated, redirecting to login");
       navigate("/login", { replace: true });
-    } else {
-      // Log page visit if authenticated
-      const pageName = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
-      logActivity("Page Visit", `Visited ${pageName} page`);
-      setIsLoading(false);
+      return;
     }
+    
+    // Log page visit if authenticated
+    const pageName = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
+    logActivity("Page Visit", `Visited ${pageName} page`);
     
   }, [navigate, location.pathname, isAuthenticated, logActivity]);
 
-  // Return loading state if still loading and authenticated
-  if (isLoading && isAuthenticated) {
+  // If not authenticated, don't render anything - the redirect will happen
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-banking-primary mb-4" />
-        <p className="text-banking-primary">Loading your banking dashboard...</p>
+        <p className="text-banking-primary">Checking authentication...</p>
       </div>
     );
   }
