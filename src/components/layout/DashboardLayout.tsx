@@ -23,7 +23,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     if (!isLoading && !isAuthenticated) {
       console.log("Not authenticated and not loading, redirecting to login");
       navigate("/login", { replace: true });
-      return;
     }
     
     // Log page visit if authenticated
@@ -44,13 +43,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     );
   }
 
-  // If not authenticated and not loading, the redirect will happen
-  // This shouldn't render, but added as a safety
+  // If not authenticated and not loading, the redirect will happen in useEffect
+  // This is a safety check but we return the loading state to prevent flashes
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-banking-primary mb-4" />
-        <p className="text-banking-primary">Checking authentication...</p>
+        <p className="text-banking-primary">Redirecting to login...</p>
       </div>
     );
   }

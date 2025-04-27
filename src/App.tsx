@@ -48,7 +48,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     console.log("Protected route check - Auth state:", isAuthenticated, "Loading:", isLoading);
   }, [isAuthenticated, isLoading]);
   
-  // During loading, show skeleton UI instead of redirecting
+  // Always show children while loading
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col space-y-4 items-center justify-center p-4">
@@ -76,8 +76,7 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     console.log("Public route check - Auth state:", isAuthenticated, "Loading:", isLoading);
   }, [isAuthenticated, isLoading]);
   
-  // During loading or authentication check, always show the children
-  // This ensures login page always shows immediately
+  // During loading, always show the children
   if (isLoading) {
     return <>{children}</>;
   }

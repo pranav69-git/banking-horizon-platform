@@ -76,13 +76,7 @@ export const useAuthEffects = () => {
       }
     };
     
-    // Set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
-      console.log("Auth state change event:", event);
-      updateAuthState(newSession);
-    });
-
-    // Get initial session - do this immediately
+    // First check for existing session (synchronously if possible)
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       console.log("Initial session check:", currentSession ? "Session exists" : "No session");
       updateAuthState(currentSession);
@@ -91,6 +85,12 @@ export const useAuthEffects = () => {
         console.error("Error checking session:", error);
         setIsLoading(false);
       }
+    });
+    
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+      console.log("Auth state change event:", event);
+      updateAuthState(newSession);
     });
 
     return () => {
