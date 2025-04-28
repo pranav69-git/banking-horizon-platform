@@ -22,81 +22,109 @@ export const useAuthEffects = () => {
     // Set loading state to true at the beginning
     setIsLoading(true);
     
-    // Function to update auth state
-    const updateAuthState = async (newSession: any) => {
+    // Set up auth state change listener first
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+      console.log("Auth state change event:", event);
+      
       if (!isMounted) return;
-      
-      console.log("Updating auth state with session:", newSession ? "exists" : "none");
-      
-      // Update session and user
+
+      // Update session and authentication status
       setSession(newSession);
       setUser(newSession?.user ?? null);
+      setIsAuthenticated(!!newSession?.user);
       
-      // Set authentication state
-      const isAuth = !!newSession?.user;
-      setIsAuthenticated(isAuth);
-      console.log("Authentication state set to:", isAuth);
-      
+      console.log("Auth state updated:", !!newSession?.user);
+
+      // If authenticated, fetch user profile
       if (newSession?.user) {
-        try {
-          // Get email from session
-          const email = newSession.user.email || "";
-          const defaultName = email ? email.split('@')[0] : "User";
+        const email = newSession.user.email || "";
+        const defaultName = email ? email.split('@')[0] : "User";
           
-          // Set minimal profile immediately to avoid rendering issues
-          setProfile({
-            name: defaultName,
-            email: email,
-            phone: "", 
-            address: "",
-            dob: "",
-            panCard: ""
+        // Set minimal profile immediately
+        setProfile({
+          name: defaultName,
+          email: email,
+          phone: "", 
+          address: "",
+          dob: "",
+          panCard: ""
+        });
+        
+        // Load activity logs
+        const savedLogs = loadActivityLogs(newSession.user.id);
+        setActivityLogs(savedLogs);
+        
+        // Fetch complete profile in background
+        fetchUserProfile(newSession.user.id)
+          .then(data => {
+            if (isMounted && data) {
+              setProfile(data);
+            }
+          })
+          .catch(err => console.error("Error fetching profile:", err))
+          .finally(() => {
+            if (isMounted) {
+              setIsLoading(false);
+            }
           });
-          
-          // Then fetch complete profile in background
-          fetchUserProfile(newSession.user.id)
-            .then(data => {
-              if (isMounted && data) {
-                setProfile(data);
-              }
-            })
-            .catch(err => console.error("Error fetching profile:", err))
-            .finally(() => {
-              if (isMounted) {
-                setIsLoading(false);
-              }
-            });
-          
-          // Load activity logs
-          const savedLogs = loadActivityLogs(newSession.user.id);
-          setActivityLogs(savedLogs);
-        } catch (error) {
-          console.error("Error in auth effect:", error);
-          if (isMounted) {
-            setIsLoading(false);
-          }
-        }
       } else {
-        // Not authenticated, set loading to false immediately
+        // Not authenticated
         setIsLoading(false);
       }
-    };
+    });
     
-    // First check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      console.log("Initial session check:", currentSession ? "Session exists" : "No session");
-      updateAuthState(currentSession);
+    // Then check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!isMounted) return;
+      
+      console.log("Initial session check:", session ? "Session exists" : "No session");
+      
+      // Update session and authentication status
+      setSession(session);
+      setUser(session?.user ?? null);
+      setIsAuthenticated(!!session?.user);
+      
+      // If authenticated, fetch user profile
+      if (session?.user) {
+        const email = session.user.email || "";
+        const defaultName = email ? email.split('@')[0] : "User";
+          
+        // Set minimal profile immediately
+        setProfile({
+          name: defaultName,
+          email: email,
+          phone: "", 
+          address: "",
+          dob: "",
+          panCard: ""
+        });
+        
+        // Load activity logs
+        const savedLogs = loadActivityLogs(session.user.id);
+        setActivityLogs(savedLogs);
+        
+        // Fetch complete profile in background
+        fetchUserProfile(session.user.id)
+          .then(data => {
+            if (isMounted && data) {
+              setProfile(data);
+            }
+          })
+          .catch(err => console.error("Error fetching profile:", err))
+          .finally(() => {
+            if (isMounted) {
+              setIsLoading(false);
+            }
+          });
+      } else {
+        // Not authenticated
+        setIsLoading(false);
+      }
     }).catch(error => {
       console.error("Error checking session:", error);
       if (isMounted) {
         setIsLoading(false);
       }
-    });
-    
-    // Set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
-      console.log("Auth state change event:", event);
-      updateAuthState(newSession);
     });
 
     return () => {

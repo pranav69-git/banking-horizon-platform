@@ -11,11 +11,11 @@ export default function Login() {
   // Redirect authenticated users to dashboard
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
+      console.log("User is authenticated, redirecting to dashboard");
       navigate("/dashboard", { replace: true });
     }
   }, [isAuthenticated, isLoading, navigate]);
   
-  // Only show login when not authenticated or still loading
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-white to-blue-50 p-4">
       <div className="mb-8 text-center">
