@@ -54,18 +54,24 @@ export const useAuthEffects = () => {
           });
           
           // Then fetch complete profile in background
-          const data = await fetchUserProfile(newSession.user.id);
-          if (isMounted && data) {
-            setProfile(data);
-          }
+          fetchUserProfile(newSession.user.id)
+            .then(data => {
+              if (isMounted && data) {
+                setProfile(data);
+              }
+            })
+            .catch(err => console.error("Error fetching profile:", err))
+            .finally(() => {
+              if (isMounted) {
+                setIsLoading(false);
+              }
+            });
           
           // Load activity logs
           const savedLogs = loadActivityLogs(newSession.user.id);
           setActivityLogs(savedLogs);
         } catch (error) {
-          console.error("Error fetching profile:", error);
-        } finally {
-          // Always set loading to false after all operations are complete
+          console.error("Error in auth effect:", error);
           if (isMounted) {
             setIsLoading(false);
           }
@@ -81,8 +87,8 @@ export const useAuthEffects = () => {
       console.log("Initial session check:", currentSession ? "Session exists" : "No session");
       updateAuthState(currentSession);
     }).catch(error => {
+      console.error("Error checking session:", error);
       if (isMounted) {
-        console.error("Error checking session:", error);
         setIsLoading(false);
       }
     });

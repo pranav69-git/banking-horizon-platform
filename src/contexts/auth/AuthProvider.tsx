@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { AuthContext } from "./AuthContext";
 import { useAuthState } from "@/hooks/use-auth-state";
@@ -28,6 +28,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Set up auth effects
   useAuthEffects();
+
+  // Debugging - log auth state changes
+  useEffect(() => {
+    console.log("Auth state updated:", { 
+      isAuthenticated, 
+      isLoading,
+      hasUser: !!user,
+      hasProfile: !!profile?.name
+    });
+  }, [isAuthenticated, isLoading, user, profile]);
 
   // Log activity and update state
   const logActivity = (action: string, details: string) => {
@@ -61,10 +71,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const handleLogin = async (email: string, password: string) => {
     setIsLoading(true);
     const result = await loginWithEmail(email, password);
+    
     if (result.success) {
+      toast({
+        title: "Login Successful",
+        description: "Welcome back to Banking Horizon!"
+      });
       return { success: true };
     }
+    
     setIsLoading(false);
+    toast({
+      variant: "destructive",
+      title: "Login Failed",
+      description: result.error || "Invalid credentials. Please try again."
+    });
     return { success: false, error: result.error };
   };
 
@@ -79,6 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     setIsLoading(true);
     const result = await logoutUser();
+    
     if (!result.success) {
       toast({
         variant: "destructive",
@@ -87,10 +109,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       setIsLoading(false);
     } else {
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out."
+      });
+      
       // Reset all state
       setUser(null);
       setSession(null);
       setIsAuthenticated(false);
+      setProfile({
+        name: "",
+        email: "",
+        phone: "", 
+        address: "",
+        dob: "",
+        panCard: ""
+      });
+      setActivityLogs([]);
       setIsLoading(false);
     }
   };

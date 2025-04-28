@@ -17,18 +17,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, isAuthenticated, isLoading, profile, logActivity } = useUserContext();
 
   useEffect(() => {
-    // Only redirect if not loading and not authenticated
-    if (!isLoading && !isAuthenticated) {
-      navigate("/login", { replace: true });
-      return;
-    }
-    
     // Log page visit if authenticated
     if (isAuthenticated && !isLoading && user) {
       const pageName = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
       logActivity("Page Visit", `Visited ${pageName} page`);
     }
-  }, [navigate, location.pathname, isAuthenticated, isLoading, logActivity, user]);
+  }, [location.pathname, isAuthenticated, isLoading, logActivity, user]);
 
   // If still loading, show loading state
   if (isLoading) {
@@ -40,8 +34,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     );
   }
 
-  // If not authenticated and not loading, the redirect will happen in useEffect
-  if (!isAuthenticated) {
+  // Only redirect if not authenticated and not loading
+  if (!isAuthenticated && !isLoading) {
+    // Use navigate inside useEffect to avoid rendering issues
+    useEffect(() => {
+      navigate("/login", { replace: true });
+    }, [navigate]);
     return null;
   }
 
