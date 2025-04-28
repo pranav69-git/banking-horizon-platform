@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import { useToast } from "@/hooks/use-toast";
 import { AuthContext } from "./AuthContext";
 import { useAuthState } from "@/hooks/use-auth-state";
@@ -26,20 +26,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading,
   } = useAuthState();
 
-  // Set up auth effects
   useAuthEffects();
 
-  // Debugging - log auth state changes
-  useEffect(() => {
-    console.log("Auth state updated:", { 
-      isAuthenticated, 
-      isLoading,
-      hasUser: !!user,
-      hasProfile: !!profile?.name
-    });
-  }, [isAuthenticated, isLoading, user, profile]);
-
-  // Log activity and update state
   const logActivity = (action: string, details: string) => {
     if (!user?.id) return;
     
@@ -49,7 +37,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     saveActivityLogs(user.id, updatedLogs);
   };
 
-  // Update user profile
   const updateProfile = async (profileData: Partial<UserProfile>) => {
     const updatedProfile = { ...profile, ...profileData };
     setProfile(updatedProfile);
@@ -67,9 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Login handler
   const handleLogin = async (email: string, password: string) => {
-    setIsLoading(true);
     const result = await loginWithEmail(email, password);
     
     if (result.success) {
@@ -80,7 +65,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: true };
     }
     
-    setIsLoading(false);
     toast({
       variant: "destructive",
       title: "Login Failed",
@@ -89,16 +73,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { success: false, error: result.error };
   };
 
-  // Logout handler
   const handleLogout = async () => {
-    // Save any unsaved data before logging out
     if (user?.id) {
       saveActivityLogs(user.id, activityLogs);
       saveProfileToStorage(profile);
       logActivity("Logout", "User logged out of the system");
     }
     
-    setIsLoading(true);
     const result = await logoutUser();
     
     if (!result.success) {
@@ -107,14 +88,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Logout failed",
         description: result.error
       });
-      setIsLoading(false);
     } else {
       toast({
         title: "Logged Out",
         description: "You have been successfully logged out."
       });
       
-      // Reset all state
       setUser(null);
       setSession(null);
       setIsAuthenticated(false);
@@ -127,7 +106,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         panCard: ""
       });
       setActivityLogs([]);
-      setIsLoading(false);
     }
   };
 

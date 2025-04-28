@@ -6,15 +6,14 @@ import { useUserContext } from "@/contexts/UserContext";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading } = useUserContext();
+  const { isAuthenticated } = useUserContext();
   
-  // Redirect authenticated users to dashboard
   useEffect(() => {
-    if (isAuthenticated && !isLoading) {
+    if (isAuthenticated) {
       console.log("User is authenticated, redirecting to dashboard");
       navigate("/dashboard", { replace: true });
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [isAuthenticated, navigate]);
   
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-white to-blue-50 p-4">
