@@ -29,6 +29,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Set up auth effects
   useAuthEffects();
 
+  // Debug logging
+  useEffect(() => {
+    console.log("AuthProvider - Auth state:", isAuthenticated, "Loading:", isLoading);
+  }, [isAuthenticated, isLoading]);
+
   // Log activity and update state
   const logActivity = (action: string, details: string) => {
     if (!user?.id) return;
@@ -63,8 +68,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     const result = await loginWithEmail(email, password);
     if (result.success) {
+      console.log("Login successful, setting authenticated to true");
       setIsAuthenticated(true); // Explicitly set authentication state
-      logActivity("Login", "User logged in successfully");
+      // Don't log activity here - wait until user data is loaded
       return { success: true };
     }
     setIsLoading(false);
@@ -77,8 +83,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (user?.id) {
       saveActivityLogs(user.id, activityLogs);
       saveProfileToStorage(profile);
+      logActivity("Logout", "User logged out of the system");
     }
     
+    setIsLoading(true);
     const result = await logoutUser();
     if (!result.success) {
       toast({
@@ -86,8 +94,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Logout failed",
         description: result.error
       });
+      setIsLoading(false);
     } else {
-      setIsAuthenticated(false); // Explicitly clear authentication state
+      // Reset all state
+      setUser(null);
+      setSession(null);
+      setIsAuthenticated(false);
+      setIsLoading(false);
+      console.log("Logout successful, auth state reset");
     }
   };
 

@@ -76,7 +76,7 @@ export const useAuthEffects = () => {
       }
     };
     
-    // First check for existing session (synchronously if possible)
+    // First check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       console.log("Initial session check:", currentSession ? "Session exists" : "No session");
       updateAuthState(currentSession);

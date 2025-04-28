@@ -17,7 +17,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, isAuthenticated, isLoading, profile, logActivity } = useUserContext();
 
   useEffect(() => {
-    console.log("DashboardLayout - Auth state:", isAuthenticated, "Loading:", isLoading);
+    console.log("DashboardLayout - Auth state:", isAuthenticated, "Loading:", isLoading, "User:", user?.id ? "exists" : "none");
     
     // Only redirect if not loading and not authenticated
     if (!isLoading && !isAuthenticated) {
@@ -26,12 +26,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     }
     
     // Log page visit if authenticated
-    if (isAuthenticated && !isLoading) {
+    if (isAuthenticated && !isLoading && user) {
       const pageName = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
       logActivity("Page Visit", `Visited ${pageName} page`);
     }
     
-  }, [navigate, location.pathname, isAuthenticated, isLoading, logActivity]);
+  }, [navigate, location.pathname, isAuthenticated, isLoading, logActivity, user]);
 
   // If still loading, show loading state
   if (isLoading) {
@@ -44,7 +44,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   // If not authenticated and not loading, the redirect will happen in useEffect
-  // This is a safety check but we return the loading state to prevent flashes
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">

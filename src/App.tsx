@@ -42,13 +42,13 @@ const queryClient = new QueryClient({
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useUserContext();
+  const { isAuthenticated, isLoading, user } = useUserContext();
   
   useEffect(() => {
-    console.log("Protected route check - Auth state:", isAuthenticated, "Loading:", isLoading);
-  }, [isAuthenticated, isLoading]);
+    console.log("Protected route check - Auth state:", isAuthenticated, "Loading:", isLoading, "User:", user?.id ? "exists" : "none");
+  }, [isAuthenticated, isLoading, user]);
   
-  // Always show children while loading
+  // Show loading state while authentication is being determined
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col space-y-4 items-center justify-center p-4">
@@ -91,6 +91,17 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const AppRoutes = () => {
+  const { isLoading } = useUserContext();
+  
+  // If the entire auth system is still initializing, show minimal loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Skeleton className="h-12 w-12 rounded-full bg-banking-primary/30" />
+      </div>
+    );
+  }
+  
   return (
     <Routes>
       {/* Redirect root to login or dashboard based on auth state */}
