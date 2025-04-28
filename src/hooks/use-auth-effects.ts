@@ -38,21 +38,21 @@ export const useAuthEffects = () => {
       console.log("Authentication state set to:", isAuth);
       
       if (newSession?.user) {
-        // Get email from session
-        const email = newSession.user.email || "";
-        const defaultName = email ? email.split('@')[0] : "User";
-        
-        // Set minimal profile immediately to avoid rendering issues
-        setProfile({
-          name: defaultName,
-          email: email,
-          phone: "", 
-          address: "",
-          dob: "",
-          panCard: ""
-        });
-        
         try {
+          // Get email from session
+          const email = newSession.user.email || "";
+          const defaultName = email ? email.split('@')[0] : "User";
+          
+          // Set minimal profile immediately to avoid rendering issues
+          setProfile({
+            name: defaultName,
+            email: email,
+            phone: "", 
+            address: "",
+            dob: "",
+            panCard: ""
+          });
+          
           // Then fetch complete profile in background
           const data = await fetchUserProfile(newSession.user.id);
           if (isMounted && data) {

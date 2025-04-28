@@ -17,12 +17,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, isAuthenticated, isLoading, profile, logActivity } = useUserContext();
 
   useEffect(() => {
-    console.log("DashboardLayout - Auth state:", isAuthenticated, "Loading:", isLoading, "User:", user?.id ? "exists" : "none");
-    
     // Only redirect if not loading and not authenticated
     if (!isLoading && !isAuthenticated) {
-      console.log("Not authenticated and not loading, redirecting to login");
       navigate("/login", { replace: true });
+      return;
     }
     
     // Log page visit if authenticated
@@ -30,7 +28,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       const pageName = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
       logActivity("Page Visit", `Visited ${pageName} page`);
     }
-    
   }, [navigate, location.pathname, isAuthenticated, isLoading, logActivity, user]);
 
   // If still loading, show loading state
@@ -45,12 +42,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   // If not authenticated and not loading, the redirect will happen in useEffect
   if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-banking-primary mb-4" />
-        <p className="text-banking-primary">Redirecting to login...</p>
-      </div>
-    );
+    return null;
   }
 
   // If authenticated and not loading, show the dashboard

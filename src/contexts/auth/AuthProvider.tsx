@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import { useToast } from "@/hooks/use-toast";
 import { AuthContext } from "./AuthContext";
 import { useAuthState } from "@/hooks/use-auth-state";
@@ -29,11 +29,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Set up auth effects
   useAuthEffects();
 
-  // Debug logging
-  useEffect(() => {
-    console.log("AuthProvider - Auth state:", isAuthenticated, "Loading:", isLoading);
-  }, [isAuthenticated, isLoading]);
-
   // Log activity and update state
   const logActivity = (action: string, details: string) => {
     if (!user?.id) return;
@@ -42,7 +37,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const updatedLogs = [newLog, ...activityLogs];
     setActivityLogs(updatedLogs);
     saveActivityLogs(user.id, updatedLogs);
-    console.log("Activity logged:", action, details);
   };
 
   // Update user profile
@@ -68,9 +62,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     const result = await loginWithEmail(email, password);
     if (result.success) {
-      console.log("Login successful, setting authenticated to true");
-      setIsAuthenticated(true); // Explicitly set authentication state
-      // Don't log activity here - wait until user data is loaded
       return { success: true };
     }
     setIsLoading(false);
@@ -101,7 +92,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(null);
       setIsAuthenticated(false);
       setIsLoading(false);
-      console.log("Logout successful, auth state reset");
     }
   };
 

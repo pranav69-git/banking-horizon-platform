@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/auth/AuthProvider";
 import { useUserContext } from "./contexts/UserContext";
-import { useEffect } from "react";
 import { Skeleton } from "./components/ui/skeleton";
 
 // Auth pages
@@ -42,13 +41,8 @@ const queryClient = new QueryClient({
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading, user } = useUserContext();
+  const { isAuthenticated, isLoading } = useUserContext();
   
-  useEffect(() => {
-    console.log("Protected route check - Auth state:", isAuthenticated, "Loading:", isLoading, "User:", user?.id ? "exists" : "none");
-  }, [isAuthenticated, isLoading, user]);
-  
-  // Show loading state while authentication is being determined
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col space-y-4 items-center justify-center p-4">
@@ -59,9 +53,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
-  // After loading completes, redirect if not authenticated
   if (!isAuthenticated) {
-    console.log("Protected route - Not authenticated, redirecting to login");
     return <Navigate to="/login" replace />;
   }
   
@@ -72,18 +64,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useUserContext();
   
-  useEffect(() => {
-    console.log("Public route check - Auth state:", isAuthenticated, "Loading:", isLoading);
-  }, [isAuthenticated, isLoading]);
-  
-  // During loading, always show the children
   if (isLoading) {
     return <>{children}</>;
   }
 
-  // Only after loading completes, redirect if authenticated
   if (isAuthenticated) {
-    console.log("Public route - Already authenticated, redirecting to dashboard");
     return <Navigate to="/dashboard" replace />;
   }
   
@@ -93,7 +78,6 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 const AppRoutes = () => {
   const { isLoading } = useUserContext();
   
-  // If the entire auth system is still initializing, show minimal loading state
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
