@@ -4,10 +4,12 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { TransactionTabs } from "./components/TransactionTabs";
 import { TransactionReceipt } from "./components/TransactionReceipt";
+import { useToast } from "@/hooks/use-toast";
 
 export default function NewTransaction() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { toast } = useToast();
   const [transactionType, setTransactionType] = useState<string>("deposit");
   const [isSuccessful, setIsSuccessful] = useState(false);
   const [receiptData, setReceiptData] = useState<any>(null);
@@ -40,6 +42,12 @@ export default function NewTransaction() {
         description: values.description || "Deposit",
         status: "completed",
       });
+      
+      // Show success toast
+      toast({
+        title: "Deposit Successful",
+        description: `₹${values.amount} has been deposited into your account.`
+      });
     }, 1500);
   }
 
@@ -61,6 +69,12 @@ export default function NewTransaction() {
         amount: values.amount,
         description: values.description || "Withdrawal",
         status: "completed",
+      });
+      
+      // Show success toast
+      toast({
+        title: "Withdrawal Successful",
+        description: `₹${values.amount} has been withdrawn from your account.`
       });
     }, 1500);
   }
@@ -84,6 +98,12 @@ export default function NewTransaction() {
         amount: values.amount,
         description: values.description || "Transfer",
         status: "completed",
+      });
+      
+      // Show success toast
+      toast({
+        title: "Transfer Successful",
+        description: `₹${values.amount} has been transferred successfully.`
       });
     }, 1500);
   }

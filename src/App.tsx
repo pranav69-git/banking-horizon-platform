@@ -22,6 +22,7 @@ import InvestmentsPage from "./pages/investments/InvestmentsPage";
 import TransactionsPage from "./pages/transactions/TransactionsPage";
 import NewTransaction from "./pages/transactions/NewTransaction";
 import LoansPage from "./pages/loans/LoansPage";
+import LoanApplicationPage from "./pages/loans/LoanApplicationPage";
 import SettingsPage from "./pages/settings/SettingsPage";
 import ActivityLogsPage from "./pages/activity/ActivityLogsPage";
 
@@ -87,6 +88,7 @@ const AppRoutes = () => {
       <Route path="/transactions" element={<ProtectedRoute><TransactionsPage /></ProtectedRoute>} />
       <Route path="/transactions/new" element={<ProtectedRoute><NewTransaction /></ProtectedRoute>} />
       <Route path="/loans" element={<ProtectedRoute><LoansPage /></ProtectedRoute>} />
+      <Route path="/loans/apply" element={<ProtectedRoute><LoanApplicationPage /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
       <Route path="/activity" element={<ProtectedRoute><ActivityLogsPage /></ProtectedRoute>} />
       

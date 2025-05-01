@@ -10,6 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DepositForm } from "./DepositForm";
 import { WithdrawalForm } from "./WithdrawalForm";
 import { TransferForm } from "./TransferForm";
+import { useToast } from "@/hooks/use-toast";
+import { useUserContext } from "@/contexts/UserContext";
 
 interface TransactionTabsProps {
   transactionType: string;
@@ -30,6 +32,37 @@ export function TransactionTabs({
   isSubmitting,
   defaultAccountId = "",
 }: TransactionTabsProps) {
+  const { toast } = useToast();
+  const { logActivity } = useUserContext();
+  
+  // Enhanced handlers with toast notifications and activity logging
+  const handleDepositSubmit = (values: any) => {
+    toast({
+      title: "Processing Deposit",
+      description: "Your deposit request is being processed."
+    });
+    logActivity("Transaction Initiated", `Deposit of ₹${values.amount} initiated to account ${values.accountId}`);
+    onDepositSubmit(values);
+  };
+  
+  const handleWithdrawalSubmit = (values: any) => {
+    toast({
+      title: "Processing Withdrawal",
+      description: "Your withdrawal request is being processed."
+    });
+    logActivity("Transaction Initiated", `Withdrawal of ₹${values.amount} initiated from account ${values.accountId}`);
+    onWithdrawalSubmit(values);
+  };
+  
+  const handleTransferSubmit = (values: any) => {
+    toast({
+      title: "Processing Transfer",
+      description: "Your transfer request is being processed."
+    });
+    logActivity("Transaction Initiated", `Transfer of ₹${values.amount} initiated from ${values.fromAccountId} to ${values.toAccountId}`);
+    onTransferSubmit(values);
+  };
+
   return (
     <Tabs 
       value={transactionType} 
@@ -61,7 +94,7 @@ export function TransactionTabs({
           </CardHeader>
           <DepositForm 
             defaultAccountId={defaultAccountId} 
-            onSubmit={onDepositSubmit} 
+            onSubmit={handleDepositSubmit} 
             isSubmitting={isSubmitting} 
           />
         </TabsContent>
@@ -75,7 +108,7 @@ export function TransactionTabs({
           </CardHeader>
           <WithdrawalForm 
             defaultAccountId={defaultAccountId} 
-            onSubmit={onWithdrawalSubmit} 
+            onSubmit={handleWithdrawalSubmit} 
             isSubmitting={isSubmitting} 
           />
         </TabsContent>
@@ -89,7 +122,7 @@ export function TransactionTabs({
           </CardHeader>
           <TransferForm 
             defaultAccountId={defaultAccountId} 
-            onSubmit={onTransferSubmit} 
+            onSubmit={handleTransferSubmit} 
             isSubmitting={isSubmitting} 
           />
         </TabsContent>
