@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -224,9 +225,9 @@ export default function NewTransaction() {
 
   // Format currency
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-IN", {
       style: "currency",
-      currency: "USD",
+      currency: "INR",
     }).format(amount);
   };
 
@@ -392,7 +393,7 @@ export default function NewTransaction() {
                           <FormLabel>Amount</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <span className="absolute left-3 top-3 text-muted-foreground">$</span>
+                              <span className="absolute left-3 top-3 text-muted-foreground">₹</span>
                               <Input
                                 type="number"
                                 placeholder="0.00"
@@ -484,7 +485,7 @@ export default function NewTransaction() {
                           <FormLabel>Amount</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <span className="absolute left-3 top-3 text-muted-foreground">$</span>
+                              <span className="absolute left-3 top-3 text-muted-foreground">₹</span>
                               <Input
                                 type="number"
                                 placeholder="0.00"
@@ -497,7 +498,7 @@ export default function NewTransaction() {
                             Available balance:{" "}
                             {withdrawalForm.watch("accountId") 
                               ? formatCurrency(mockAccounts.find(acc => acc.id === withdrawalForm.watch("accountId"))?.balance || 0)
-                              : "$0.00"
+                              : "₹0.00"
                             }
                           </FormDescription>
                           <FormMessage />
@@ -616,7 +617,7 @@ export default function NewTransaction() {
                           <FormLabel>Amount</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <span className="absolute left-3 top-3 text-muted-foreground">$</span>
+                              <span className="absolute left-3 top-3 text-muted-foreground">₹</span>
                               <Input
                                 type="number"
                                 placeholder="0.00"
@@ -629,7 +630,7 @@ export default function NewTransaction() {
                             Available balance:{" "}
                             {transferForm.watch("fromAccountId") 
                               ? formatCurrency(mockAccounts.find(acc => acc.id === transferForm.watch("fromAccountId"))?.balance || 0)
-                              : "$0.00"
+                              : "₹0.00"
                             }
                           </FormDescription>
                           <FormMessage />

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import {
@@ -28,7 +29,7 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { Users, DollarSign, PiggyBank, AlertTriangle, Download } from "lucide-react";
+import { Users, IndianRupee, PiggyBank, AlertTriangle, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -76,6 +77,15 @@ export default function AdminDashboard() {
     }
   }, []);
 
+  // Function to format currency in INR
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -111,7 +121,7 @@ export default function AdminDashboard() {
           <Card className="border-banking-secondary/20">
             <CardContent className="flex items-center gap-4 p-6">
               <div className="bg-green-100 p-3 rounded-full">
-                <DollarSign className="h-6 w-6 text-green-600" />
+                <IndianRupee className="h-6 w-6 text-green-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Deposits</p>
@@ -172,7 +182,7 @@ export default function AdminDashboard() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis />
-                    <Tooltip formatter={(value) => `$${value}`} />
+                    <Tooltip formatter={(value) => `₹${(value as number).toLocaleString('en-IN')}`} />
                     <Legend />
                     <Bar dataKey="deposits" fill="#0A2463" name="Deposits" />
                     <Bar dataKey="withdrawals" fill="#E76F51" name="Withdrawals" />
@@ -292,10 +302,7 @@ export default function AdminDashboard() {
                       <TableCell>{loan.customer}</TableCell>
                       <TableCell>{loan.type}</TableCell>
                       <TableCell>
-                        {new Intl.NumberFormat("en-US", {
-                          style: "currency",
-                          currency: "USD",
-                        }).format(loan.amount)}
+                        {formatCurrency(loan.amount)}
                       </TableCell>
                       <TableCell>
                         <Badge 
