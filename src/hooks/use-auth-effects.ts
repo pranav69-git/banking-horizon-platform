@@ -19,6 +19,9 @@ export const useAuthEffects = () => {
     console.log("Setting up auth effects");
     let isMounted = true;
 
+    // Set isLoading to false immediately
+    setIsLoading(false);
+
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth state change event:", event);
@@ -53,17 +56,18 @@ export const useAuthEffects = () => {
           })
           .catch(err => console.error("Error fetching profile:", err));
       }
+      
+      // Always ensure loading is false after auth state change
       setIsLoading(false);
     });
     
-    // Check for existing session
+    // Check for existing session - but don't wait for it to show UI
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!isMounted) return;
       
       setSession(session);
       setUser(session?.user ?? null);
       setIsAuthenticated(!!session?.user);
-      setIsLoading(false);
       
       if (session?.user) {
         const email = session.user.email || "";
@@ -88,6 +92,9 @@ export const useAuthEffects = () => {
           })
           .catch(err => console.error("Error fetching profile:", err));
       }
+      
+      // Always ensure loading is false after session check
+      setIsLoading(false);
     });
 
     return () => {

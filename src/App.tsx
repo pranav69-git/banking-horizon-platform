@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/auth/AuthProvider";
 import { useUserContext } from "./contexts/UserContext";
-import { Skeleton } from "./components/ui/skeleton";
 
 // Auth pages
 import Login from "./pages/Login";
@@ -41,17 +40,7 @@ const queryClient = new QueryClient({
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useUserContext();
-  
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex flex-col space-y-4 items-center justify-center p-4">
-        <Skeleton className="h-12 w-12 rounded-full bg-banking-primary/30" />
-        <Skeleton className="h-4 w-[200px] bg-banking-primary/20" />
-        <Skeleton className="h-4 w-[150px] bg-banking-primary/20" />
-      </div>
-    );
-  }
+  const { isAuthenticated } = useUserContext();
   
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -62,11 +51,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Public Route Component
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useUserContext();
-  
-  if (isLoading) {
-    return <>{children}</>;
-  }
+  const { isAuthenticated } = useUserContext();
 
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
@@ -76,16 +61,6 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const AppRoutes = () => {
-  const { isLoading } = useUserContext();
-  
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Skeleton className="h-12 w-12 rounded-full bg-banking-primary/30" />
-      </div>
-    );
-  }
-  
   return (
     <Routes>
       {/* Redirect root to login or dashboard based on auth state */}

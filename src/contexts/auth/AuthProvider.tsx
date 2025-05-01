@@ -26,6 +26,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading,
   } = useAuthState();
 
+  // Initialize auth effects - but don't wait for it to render UI
   useAuthEffects();
 
   const logActivity = (action: string, details: string) => {
@@ -62,6 +63,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Login Successful",
         description: "Welcome back to Banking Horizon!"
       });
+      
+      // Set authenticated state immediately on successful login
+      if (result.session) {
+        setSession(result.session);
+        setUser(result.session.user);
+        setIsAuthenticated(true);
+      }
+      
       return { success: true };
     }
     
@@ -123,7 +132,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loginUser: handleLogin,
         logoutUser: handleLogout,
         isAuthenticated,
-        isLoading
+        isLoading: false // Always set to false to immediately show content
       }}
     >
       {children}

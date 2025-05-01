@@ -25,10 +25,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   }, [location.pathname, isAuthenticated, logActivity, user, navigate]);
 
-  if (!isAuthenticated) {
-    return null;
-  }
-
+  // Show content directly without loading states
   return (
     <div className="min-h-screen flex bg-background">
       <Sidebar 

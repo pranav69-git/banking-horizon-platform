@@ -15,6 +15,7 @@ export default function Login() {
     }
   }, [isAuthenticated, navigate]);
   
+  // Show login form immediately without loading state
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-white to-blue-50 p-4">
       <div className="mb-8 text-center">
