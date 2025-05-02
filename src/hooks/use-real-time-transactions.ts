@@ -47,10 +47,10 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
           const formattedData: Transaction[] = data.map(item => ({
             id: item.id,
             date: item.date || new Date().toISOString(),
-            type: item.type as "deposit" | "withdrawal" | "transfer",
+            type: (item.type as "deposit" | "withdrawal" | "transfer"),
             amount: Number(item.amount),
-            description: item.description || item.type,
-            status: item.status as "completed" | "pending" | "failed",
+            description: item.description || item.type || "",
+            status: (item.status as "completed" | "pending" | "failed"),
             account_id: item.account_id,
           }));
           
@@ -88,10 +88,10 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
             const formattedTransaction: Transaction = {
               id: newTransaction.id,
               date: newTransaction.date || new Date().toISOString(),
-              type: newTransaction.type as "deposit" | "withdrawal" | "transfer",
+              type: (newTransaction.type as "deposit" | "withdrawal" | "transfer"),
               amount: Number(newTransaction.amount),
-              description: newTransaction.description || newTransaction.type,
-              status: newTransaction.status as "completed" | "pending" | "failed",
+              description: newTransaction.description || newTransaction.type || "",
+              status: (newTransaction.status as "completed" | "pending" | "failed"),
               account_id: newTransaction.account_id,
             };
             
@@ -113,9 +113,9 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
                 t.id === updatedTransaction.id 
                   ? {
                       ...t,
-                      status: updatedTransaction.status,
+                      status: updatedTransaction.status as "completed" | "pending" | "failed",
                       date: updatedTransaction.date || t.date,
-                      description: updatedTransaction.description || t.description,
+                      description: updatedTransaction.description || t.description || "",
                     } 
                   : t
               )
@@ -157,7 +157,7 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
         .insert({
           type: transaction.type,
           amount: transaction.amount,
-          description: transaction.description,
+          description: transaction.description || "",
           status: transaction.status,
           account_id: transaction.account_id || 'default-account',
         })
@@ -183,10 +183,10 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
       const savedTransaction: Transaction = {
         id: data.id,
         date: data.date || new Date().toISOString(),
-        type: data.type,
+        type: data.type as "deposit" | "withdrawal" | "transfer",
         amount: Number(data.amount),
-        description: data.description || data.type,
-        status: data.status,
+        description: data.description || data.type || "",
+        status: data.status as "completed" | "pending" | "failed",
         account_id: data.account_id,
       };
       

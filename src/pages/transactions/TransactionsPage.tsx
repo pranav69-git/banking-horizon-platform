@@ -89,12 +89,11 @@ export default function TransactionsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <label className="text-sm font-medium">Transaction Type</label>
-            <Select value={transactionType || ""} onValueChange={setTransactionType}>
+            <Select value={transactionType || undefined} onValueChange={setTransactionType}>
               <SelectTrigger className="w-full mt-1">
                 <SelectValue placeholder="All Types" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
                 <SelectItem value="deposit">Deposit</SelectItem>
                 <SelectItem value="withdrawal">Withdrawal</SelectItem>
                 <SelectItem value="transfer">Transfer</SelectItem>
@@ -104,12 +103,11 @@ export default function TransactionsPage() {
           
           <div>
             <label className="text-sm font-medium">Status</label>
-            <Select value={status || ""} onValueChange={setStatus}>
+            <Select value={status || undefined} onValueChange={setStatus}>
               <SelectTrigger className="w-full mt-1">
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="failed">Failed</SelectItem>
