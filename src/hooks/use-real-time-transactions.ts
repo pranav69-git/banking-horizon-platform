@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserContext } from "@/contexts/UserContext";
@@ -49,7 +48,8 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
             date: item.date || new Date().toISOString(),
             type: (item.type as "deposit" | "withdrawal" | "transfer"),
             amount: Number(item.amount),
-            description: item.description || item.type || "",
+            // Since description might not exist in the database schema, provide a fallback
+            description: item.type || "",
             status: (item.status as "completed" | "pending" | "failed"),
             account_id: item.account_id,
           }));
@@ -90,7 +90,8 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
               date: newTransaction.date || new Date().toISOString(),
               type: (newTransaction.type as "deposit" | "withdrawal" | "transfer"),
               amount: Number(newTransaction.amount),
-              description: newTransaction.description || newTransaction.type || "",
+              // Since description might not exist in the database schema, provide a fallback
+              description: newTransaction.type || "",
               status: (newTransaction.status as "completed" | "pending" | "failed"),
               account_id: newTransaction.account_id,
             };
@@ -115,7 +116,8 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
                       ...t,
                       status: updatedTransaction.status as "completed" | "pending" | "failed",
                       date: updatedTransaction.date || t.date,
-                      description: updatedTransaction.description || t.description || "",
+                      // Keep the existing description since it might not be in the database
+                      description: t.description,
                     } 
                   : t
               )
@@ -157,7 +159,7 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
         .insert({
           type: transaction.type,
           amount: transaction.amount,
-          description: transaction.description || "",
+          // We'll handle description separately since it might not exist in the schema
           status: transaction.status,
           account_id: transaction.account_id || 'default-account',
         })
@@ -185,7 +187,8 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
         date: data.date || new Date().toISOString(),
         type: data.type as "deposit" | "withdrawal" | "transfer",
         amount: Number(data.amount),
-        description: data.description || data.type || "",
+        // Use type as fallback since description might not exist in database
+        description: data.type || "",
         status: data.status as "completed" | "pending" | "failed",
         account_id: data.account_id,
       };
