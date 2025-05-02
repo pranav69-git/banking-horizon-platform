@@ -203,17 +203,20 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
         return null;
       }
       
+      // Type assertion to ensure data has all properties we need
+      const dbData = data as DbTransaction;
+      
       // Replace temporary transaction with the real one
       const savedTransaction: Transaction = {
-        id: data.id,
-        date: data.date || new Date().toISOString(),
-        type: data.type as "deposit" | "withdrawal" | "transfer",
-        amount: Number(data.amount),
-        description: data.description || data.type || "", // Use description if available, fall back to type
-        status: data.status as "completed" | "pending" | "failed",
-        account_id: data.account_id,
-        fromAccount: data.from_account,
-        toAccount: data.to_account,
+        id: dbData.id,
+        date: dbData.date || new Date().toISOString(),
+        type: dbData.type as "deposit" | "withdrawal" | "transfer",
+        amount: Number(dbData.amount),
+        description: dbData.description || dbData.type || "", // Use description if available, fall back to type
+        status: dbData.status as "completed" | "pending" | "failed",
+        account_id: dbData.account_id,
+        fromAccount: dbData.from_account,
+        toAccount: dbData.to_account,
       };
       
       setTransactions(prev => 

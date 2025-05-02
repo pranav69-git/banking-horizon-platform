@@ -13,13 +13,21 @@ export const loginWithEmail = async (email: string, password: string) => {
         user: {
           id: "demo-user-id",
           email: email,
-          role: "customer"
+          role: "customer",
+          app_metadata: {},
+          user_metadata: {},
+          aud: "authenticated",
+          created_at: new Date().toISOString()
         },
         session: {
           user: {
             id: "demo-user-id",
             email: email,
-            role: "customer"
+            role: "customer",
+            app_metadata: {},
+            user_metadata: {},
+            aud: "authenticated",
+            created_at: new Date().toISOString()
           },
           access_token: "demo-token",
           refresh_token: "demo-refresh-token",
