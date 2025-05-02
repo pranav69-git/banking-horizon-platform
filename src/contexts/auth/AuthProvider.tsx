@@ -68,6 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Set authenticated state immediately on successful login
       if (result.data && result.data.session) {
+        // Use the complete session object from the result
         setSession(result.data.session);
         setUser(result.data.user);
         setIsAuthenticated(true);

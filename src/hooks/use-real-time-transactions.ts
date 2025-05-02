@@ -9,7 +9,7 @@ export interface Transaction {
   date: string;
   type: "deposit" | "withdrawal" | "transfer";
   amount: number;
-  description: string;
+  description?: string;
   status: "completed" | "pending" | "failed";
   fromAccount?: string;
   toAccount?: string;
@@ -26,6 +26,7 @@ interface DbTransaction {
   account_id: string;
   from_account?: string;
   to_account?: string;
+  description?: string;
 }
 
 export function useRealTimeTransactions(initialTransactions: Transaction[] = []) {
@@ -61,7 +62,7 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
             date: item.date || new Date().toISOString(),
             type: item.type as "deposit" | "withdrawal" | "transfer",
             amount: Number(item.amount),
-            description: item.type || "", // Use type as description fallback
+            description: item.description || item.type || "", // Use description if available, fall back to type
             status: item.status as "completed" | "pending" | "failed",
             account_id: item.account_id,
             fromAccount: item.from_account,
@@ -104,7 +105,7 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
               date: newTransaction.date || new Date().toISOString(),
               type: newTransaction.type as "deposit" | "withdrawal" | "transfer",
               amount: Number(newTransaction.amount),
-              description: newTransaction.type || "", // Use type as description fallback
+              description: newTransaction.description || newTransaction.type || "", // Use description if available, fall back to type
               status: newTransaction.status as "completed" | "pending" | "failed",
               account_id: newTransaction.account_id,
               fromAccount: newTransaction.from_account,
@@ -131,7 +132,7 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
                       ...t,
                       status: updatedTransaction.status as "completed" | "pending" | "failed",
                       date: updatedTransaction.date || t.date,
-                      description: t.description, // Keep existing description
+                      description: updatedTransaction.description || t.description || updatedTransaction.type || "",
                       fromAccount: updatedTransaction.from_account || t.fromAccount,
                       toAccount: updatedTransaction.to_account || t.toAccount,
                     } 
@@ -177,6 +178,7 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
         account_id: transaction.account_id || 'default-account',
         from_account: transaction.fromAccount,
         to_account: transaction.toAccount,
+        description: transaction.description,
       };
         
       // Then save to database
@@ -207,7 +209,7 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
         date: data.date || new Date().toISOString(),
         type: data.type as "deposit" | "withdrawal" | "transfer",
         amount: Number(data.amount),
-        description: data.type || "", // Use type as description fallback
+        description: data.description || data.type || "", // Use description if available, fall back to type
         status: data.status as "completed" | "pending" | "failed",
         account_id: data.account_id,
         fromAccount: data.from_account,

@@ -6,7 +6,7 @@ export const loginWithEmail = async (email: string, password: string) => {
     // For demo purposes, simulate successful login
     // In a real app, uncomment the real authentication code below
     
-    // Simulated login response for demo
+    // Simulated login response for demo with proper Session structure
     return { 
       success: true, 
       data: {
@@ -23,7 +23,9 @@ export const loginWithEmail = async (email: string, password: string) => {
           },
           access_token: "demo-token",
           refresh_token: "demo-refresh-token",
-          expires_at: Date.now() + 3600000 // 1 hour from now
+          expires_at: Date.now() + 3600000, // 1 hour from now
+          expires_in: 3600, // seconds
+          token_type: "bearer"
         }
       }
     };
