@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { AccountSummaryCard } from "@/components/dashboard/AccountSummaryCard";
 import { TransactionsList } from "@/components/dashboard/TransactionsList";
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useUserContext } from "@/contexts/UserContext";
 import { Link } from "react-router-dom";
+import { useRealTimeTransactions } from "@/hooks/use-real-time-transactions";
 
 // Mock data for accounts with Indian currency
 const mockAccounts = [
@@ -40,71 +41,24 @@ const mockAccounts = [
   },
 ];
 
-// Mock data for transactions with Indian names
-const mockTransactions = [
-  {
-    id: "TRX-001",
-    date: "2023-04-15",
-    type: "deposit" as const,
-    amount: 25000.00,
-    description: "Salary deposit",
-    status: "completed" as const,
-  },
-  {
-    id: "TRX-002",
-    date: "2023-04-14",
-    type: "withdrawal" as const,
-    amount: 12050.50,
-    description: "ATM withdrawal",
-    status: "completed" as const,
-  },
-  {
-    id: "TRX-003",
-    date: "2023-04-13",
-    type: "transfer" as const,
-    amount: 50000.00,
-    description: "Transfer to Rahul Sharma",
-    status: "completed" as const,
-    fromAccount: "SA-12345678",
-    toAccount: "External",
-  },
-  {
-    id: "TRX-004",
-    date: "2023-04-12",
-    type: "deposit" as const,
-    amount: 100000.00,
-    description: "Bonus payment",
-    status: "completed" as const,
-  },
-  {
-    id: "TRX-005",
-    date: "2023-04-10",
-    type: "transfer" as const,
-    amount: 7525.25,
-    description: "Utility bill payment",
-    status: "pending" as const,
-    fromAccount: "CA-87654321",
-    toAccount: "External",
-  },
-];
-
 export default function Dashboard() {
   const { profile, logActivity } = useUserContext();
+  const { transactions } = useRealTimeTransactions([]);
 
   useEffect(() => {
     // Log dashboard visit
     logActivity("Dashboard Visit", "User viewed the dashboard");
   }, [logActivity]);
 
-  // Calculate total balance, incoming, outgoing amounts
+  // Calculate total balance, incoming, outgoing amounts based on real-time data
   const totalBalance = mockAccounts.reduce((sum, account) => sum + account.balance, 0);
-  const incomingAmount = mockTransactions
+  const incomingAmount = transactions
     .filter(t => t.type === "deposit")
     .reduce((sum, t) => sum + t.amount, 0);
-  const outgoingAmount = mockTransactions
+  const outgoingAmount = transactions
     .filter(t => t.type === "withdrawal" || t.type === "transfer")
     .reduce((sum, t) => sum + t.amount, 0);
-  const pendingTransactions = mockTransactions
+  const pendingTransactions = transactions
     .filter(t => t.status === "pending")
     .length;
 
@@ -166,7 +120,7 @@ export default function Dashboard() {
             <TabsTrigger value="upcoming">Upcoming Payments</TabsTrigger>
           </TabsList>
           <TabsContent value="transactions">
-            <TransactionsList transactions={mockTransactions} limit={5} />
+            <TransactionsList transactions={transactions} limit={5} />
           </TabsContent>
           <TabsContent value="upcoming">
             <Card className="border-banking-secondary/20 shadow-md">

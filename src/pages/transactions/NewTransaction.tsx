@@ -5,6 +5,8 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { TransactionTabs } from "./components/TransactionTabs";
 import { TransactionReceipt } from "./components/TransactionReceipt";
 import { useToast } from "@/hooks/use-toast";
+import { useRealTimeTransactions } from "@/hooks/use-real-time-transactions";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function NewTransaction() {
   const navigate = useNavigate();
@@ -14,6 +16,9 @@ export default function NewTransaction() {
   const [isSuccessful, setIsSuccessful] = useState(false);
   const [receiptData, setReceiptData] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Use our real-time transactions hook
+  const { addTransaction } = useRealTimeTransactions([]);
 
   // Set initial transaction type based on URL params
   useEffect(() => {
@@ -24,73 +29,125 @@ export default function NewTransaction() {
   }, [searchParams]);
 
   // Handle deposit form submission
-  function onDepositSubmit(values: any) {
+  async function onDepositSubmit(values: any) {
     setIsSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSuccessful(true);
+    try {
+      // Generate transaction ID
+      const transactionId = `TRX-${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`;
+      
+      // Add the transaction to our database
+      const transaction = await addTransaction({
+        type: "deposit",
+        amount: values.amount,
+        description: values.description || "Deposit",
+        status: "completed",
+        account_id: values.accountId,
+      });
       
       // Create receipt data
-      setReceiptData({
-        transactionId: `TRX-${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`,
+      const receiptData = {
+        transactionId: transaction?.id || transactionId,
         date: new Date().toISOString(),
         type: "deposit",
         account: values.accountId,
         amount: values.amount,
         description: values.description || "Deposit",
         status: "completed",
-      });
+      };
+      
+      setIsSuccessful(true);
+      setReceiptData(receiptData);
       
       // Show success toast
       toast({
         title: "Deposit Successful",
         description: `₹${values.amount} has been deposited into your account.`
       });
-    }, 1500);
+    } catch (error) {
+      console.error("Error creating deposit:", error);
+      
+      toast({
+        title: "Deposit Failed",
+        description: "There was an error processing your deposit.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   // Handle withdrawal form submission
-  function onWithdrawalSubmit(values: any) {
+  async function onWithdrawalSubmit(values: any) {
     setIsSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSuccessful(true);
+    try {
+      // Generate transaction ID
+      const transactionId = `TRX-${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`;
+      
+      // Add the transaction to our database
+      const transaction = await addTransaction({
+        type: "withdrawal",
+        amount: values.amount,
+        description: values.description || "Withdrawal",
+        status: "completed",
+        account_id: values.accountId,
+      });
       
       // Create receipt data
-      setReceiptData({
-        transactionId: `TRX-${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`,
+      const receiptData = {
+        transactionId: transaction?.id || transactionId,
         date: new Date().toISOString(),
         type: "withdrawal",
         account: values.accountId,
         amount: values.amount,
         description: values.description || "Withdrawal",
         status: "completed",
-      });
+      };
+      
+      setIsSuccessful(true);
+      setReceiptData(receiptData);
       
       // Show success toast
       toast({
         title: "Withdrawal Successful",
         description: `₹${values.amount} has been withdrawn from your account.`
       });
-    }, 1500);
+    } catch (error) {
+      console.error("Error creating withdrawal:", error);
+      
+      toast({
+        title: "Withdrawal Failed",
+        description: "There was an error processing your withdrawal.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   // Handle transfer form submission
-  function onTransferSubmit(values: any) {
+  async function onTransferSubmit(values: any) {
     setIsSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSuccessful(true);
+    try {
+      // Generate transaction ID
+      const transactionId = `TRX-${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`;
+      
+      // Add the transaction to our database
+      const transaction = await addTransaction({
+        type: "transfer",
+        amount: values.amount,
+        description: values.description || "Transfer",
+        status: "completed",
+        account_id: values.fromAccountId,
+        fromAccount: values.fromAccountId,
+        toAccount: values.toAccountId,
+      });
       
       // Create receipt data
-      setReceiptData({
-        transactionId: `TRX-${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`,
+      const receiptData = {
+        transactionId: transaction?.id || transactionId,
         date: new Date().toISOString(),
         type: "transfer",
         fromAccount: values.fromAccountId,
@@ -98,14 +155,27 @@ export default function NewTransaction() {
         amount: values.amount,
         description: values.description || "Transfer",
         status: "completed",
-      });
+      };
+      
+      setIsSuccessful(true);
+      setReceiptData(receiptData);
       
       // Show success toast
       toast({
         title: "Transfer Successful",
         description: `₹${values.amount} has been transferred successfully.`
       });
-    }, 1500);
+    } catch (error) {
+      console.error("Error creating transfer:", error);
+      
+      toast({
+        title: "Transfer Failed",
+        description: "There was an error processing your transfer.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   // If transaction is successful, show receipt

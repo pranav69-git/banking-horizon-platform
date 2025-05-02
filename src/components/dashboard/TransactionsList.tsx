@@ -20,18 +20,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
-
-interface Transaction {
-  id: string;
-  date: string;
-  type: "deposit" | "withdrawal" | "transfer";
-  amount: number;
-  description: string;
-  status: "completed" | "pending" | "failed";
-  fromAccount?: string;
-  toAccount?: string;
-}
+import { useState, useEffect } from "react";
+import { Transaction, useRealTimeTransactions } from "@/hooks/use-real-time-transactions";
 
 interface TransactionsListProps {
   transactions: Transaction[];
@@ -40,12 +30,13 @@ interface TransactionsListProps {
 }
 
 export function TransactionsList({ 
-  transactions,
+  transactions: initialTransactions,
   showFilters = false,
   limit
 }: TransactionsListProps) {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const { transactions } = useRealTimeTransactions(initialTransactions);
   
   const filteredTransactions = transactions.filter(
     (transaction) =>

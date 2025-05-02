@@ -6,6 +6,7 @@ import { LoanApplicationForm } from "./components/LoanApplicationForm";
 import { LoanApplicationSuccess } from "./components/LoanApplicationSuccess";
 import { useToast } from "@/hooks/use-toast";
 import { useUserContext } from "@/contexts/UserContext";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function LoanApplicationPage() {
   const navigate = useNavigate();
@@ -16,29 +17,47 @@ export default function LoanApplicationPage() {
   const [loanData, setLoanData] = useState<any>(null);
 
   // Handle loan application form submission
-  function onLoanApplicationSubmit(values: any) {
+  async function onLoanApplicationSubmit(values: any) {
     setIsSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSuccessful(true);
+    try {
+      // Generate loan ID
+      const loanId = `LOAN-${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`;
+      
+      // Calculate interest rate based on loan type
+      const interestRate = values.loanType === "home" ? 8.5 : 
+                          values.loanType === "personal" ? 12.5 : 
+                          values.loanType === "education" ? 9.0 : 10.5;
       
       // Create loan data
-      const loanData = {
-        id: `LOAN-${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`,
+      const newLoanData = {
+        id: loanId,
         date: new Date().toISOString(),
         type: values.loanType,
         amount: values.amount,
         term: values.term,
         purpose: values.purpose,
-        interestRate: values.loanType === "home" ? 8.5 : 
-                     values.loanType === "personal" ? 12.5 : 
-                     values.loanType === "education" ? 9.0 : 10.5,
+        interestRate,
         status: "pending",
       };
       
-      setLoanData(loanData);
+      // Insert loan into database if we have user data
+      if (user) {
+        const { error } = await supabase.from('loans').insert({
+          type: values.loanType,
+          amount: values.amount,
+          customer_id: user.id,
+          status: 'pending'
+        });
+        
+        if (error) {
+          console.error("Error saving loan:", error);
+          throw new Error("Failed to save loan application");
+        }
+      }
+      
+      setLoanData(newLoanData);
+      setIsSuccessful(true);
       
       // Log activity
       if (user) {
@@ -53,7 +72,17 @@ export default function LoanApplicationPage() {
         title: "Application Submitted",
         description: "Your loan application has been submitted successfully."
       });
-    }, 1500);
+    } catch (error) {
+      console.error("Error submitting loan application:", error);
+      
+      toast({
+        title: "Application Failed",
+        description: "There was an error submitting your loan application.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   // If loan application is successful, show the success component
