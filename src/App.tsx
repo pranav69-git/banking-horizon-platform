@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/auth/AuthProvider";
 import { useUserContext } from "./contexts/UserContext";
+import { AppSetup } from "./app-setup"; // Import the app setup component
 
 // Auth pages
 import Login from "./pages/Login";
@@ -109,6 +110,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <AppSetup /> {/* Include AppSetup to populate initial data */}
           <AppRoutes />
         </BrowserRouter>
       </TooltipProvider>

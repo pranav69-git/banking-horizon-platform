@@ -36,8 +36,11 @@ export function TransactionsList({
 }: TransactionsListProps) {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  
+  // Use our real-time transactions hook with initial transactions
   const { transactions } = useRealTimeTransactions(initialTransactions);
   
+  // Filter transactions based on selected filters and search term
   const filteredTransactions = transactions.filter(
     (transaction) =>
       transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -46,6 +49,7 @@ export function TransactionsList({
       transaction.status.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Limit the number of transactions to display if limit is provided
   const displayTransactions = limit 
     ? filteredTransactions.slice(0, limit) 
     : filteredTransactions;

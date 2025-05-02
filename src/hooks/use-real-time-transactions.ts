@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserContext } from "@/contexts/UserContext";
@@ -13,6 +14,18 @@ export interface Transaction {
   fromAccount?: string;
   toAccount?: string;
   account_id?: string;
+}
+
+// Define the database transaction type to match what's in Supabase
+interface DbTransaction {
+  id: string;
+  date: string;
+  type: string;
+  amount: number;
+  status: string;
+  account_id: string;
+  from_account?: string;
+  to_account?: string;
 }
 
 export function useRealTimeTransactions(initialTransactions: Transaction[] = []) {
@@ -43,15 +56,16 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
         
         if (data) {
           // Transform the database data to match our Transaction interface
-          const formattedData: Transaction[] = data.map(item => ({
+          const formattedData: Transaction[] = data.map((item: DbTransaction) => ({
             id: item.id,
             date: item.date || new Date().toISOString(),
-            type: (item.type as "deposit" | "withdrawal" | "transfer"),
+            type: item.type as "deposit" | "withdrawal" | "transfer",
             amount: Number(item.amount),
-            // Since description might not exist in the database schema, provide a fallback
-            description: item.type || "",
-            status: (item.status as "completed" | "pending" | "failed"),
+            description: item.type || "", // Use type as description fallback
+            status: item.status as "completed" | "pending" | "failed",
             account_id: item.account_id,
+            fromAccount: item.from_account,
+            toAccount: item.to_account,
           }));
           
           setTransactions(formattedData);
@@ -82,18 +96,19 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
           
           // Handle different types of changes
           if (payload.eventType === 'INSERT') {
-            const newTransaction = payload.new as any;
+            const newTransaction = payload.new as DbTransaction;
             
             // Format the new transaction to match our interface
             const formattedTransaction: Transaction = {
               id: newTransaction.id,
               date: newTransaction.date || new Date().toISOString(),
-              type: (newTransaction.type as "deposit" | "withdrawal" | "transfer"),
+              type: newTransaction.type as "deposit" | "withdrawal" | "transfer",
               amount: Number(newTransaction.amount),
-              // Since description might not exist in the database schema, provide a fallback
-              description: newTransaction.type || "",
-              status: (newTransaction.status as "completed" | "pending" | "failed"),
+              description: newTransaction.type || "", // Use type as description fallback
+              status: newTransaction.status as "completed" | "pending" | "failed",
               account_id: newTransaction.account_id,
+              fromAccount: newTransaction.from_account,
+              toAccount: newTransaction.to_account,
             };
             
             // Add to our transactions state
@@ -106,7 +121,7 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
             });
           } 
           else if (payload.eventType === 'UPDATE') {
-            const updatedTransaction = payload.new as any;
+            const updatedTransaction = payload.new as DbTransaction;
             
             // Update the transaction in our state
             setTransactions(prev => 
@@ -116,8 +131,9 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
                       ...t,
                       status: updatedTransaction.status as "completed" | "pending" | "failed",
                       date: updatedTransaction.date || t.date,
-                      // Keep the existing description since it might not be in the database
-                      description: t.description,
+                      description: t.description, // Keep existing description
+                      fromAccount: updatedTransaction.from_account || t.fromAccount,
+                      toAccount: updatedTransaction.to_account || t.toAccount,
                     } 
                   : t
               )
@@ -153,16 +169,20 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
       // Update local state first for immediate feedback
       setTransactions(prev => [newTransaction, ...prev]);
       
+      // Prepare data for insert - map our interface to DB schema
+      const dbTransaction = {
+        type: transaction.type,
+        amount: transaction.amount,
+        status: transaction.status,
+        account_id: transaction.account_id || 'default-account',
+        from_account: transaction.fromAccount,
+        to_account: transaction.toAccount,
+      };
+        
       // Then save to database
       const { data, error } = await supabase
         .from('transactions')
-        .insert({
-          type: transaction.type,
-          amount: transaction.amount,
-          // We'll handle description separately since it might not exist in the schema
-          status: transaction.status,
-          account_id: transaction.account_id || 'default-account',
-        })
+        .insert(dbTransaction)
         .select()
         .single();
         
@@ -187,10 +207,11 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
         date: data.date || new Date().toISOString(),
         type: data.type as "deposit" | "withdrawal" | "transfer",
         amount: Number(data.amount),
-        // Use type as fallback since description might not exist in database
-        description: data.type || "",
+        description: data.type || "", // Use type as description fallback
         status: data.status as "completed" | "pending" | "failed",
         account_id: data.account_id,
+        fromAccount: data.from_account,
+        toAccount: data.to_account,
       };
       
       setTransactions(prev => 

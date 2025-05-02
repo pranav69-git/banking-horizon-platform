@@ -19,8 +19,8 @@ export const useAuthEffects = () => {
     console.log("Setting up auth effects");
     let isMounted = true;
 
-    // Set isLoading to false immediately
-    setIsLoading(false);
+    // Set isLoading to true initially
+    setIsLoading(true);
 
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -45,23 +45,31 @@ export const useAuthEffects = () => {
           panCard: ""
         });
         
-        const savedLogs = loadActivityLogs(session.user.id);
-        setActivityLogs(savedLogs);
+        // Defer loading activity logs to avoid auth deadlock
+        setTimeout(() => {
+          if (!isMounted) return;
+          const savedLogs = loadActivityLogs(session.user.id);
+          setActivityLogs(savedLogs);
+        }, 0);
         
-        fetchUserProfile(session.user.id)
-          .then(data => {
-            if (isMounted && data) {
-              setProfile(data);
-            }
-          })
-          .catch(err => console.error("Error fetching profile:", err));
+        // Defer fetching user profile to avoid auth deadlock
+        setTimeout(() => {
+          if (!isMounted) return;
+          fetchUserProfile(session.user.id)
+            .then(data => {
+              if (isMounted && data) {
+                setProfile(data);
+              }
+            })
+            .catch(err => console.error("Error fetching profile:", err));
+        }, 0);
       }
       
-      // Always ensure loading is false after auth state change
+      // Always set loading to false after auth state change is processed
       setIsLoading(false);
     });
     
-    // Check for existing session - but don't wait for it to show UI
+    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!isMounted) return;
       
@@ -81,9 +89,11 @@ export const useAuthEffects = () => {
           panCard: ""
         });
         
+        // Load user's activity logs
         const savedLogs = loadActivityLogs(session.user.id);
         setActivityLogs(savedLogs);
         
+        // Fetch user profile data
         fetchUserProfile(session.user.id)
           .then(data => {
             if (isMounted && data) {
@@ -93,7 +103,7 @@ export const useAuthEffects = () => {
           .catch(err => console.error("Error fetching profile:", err));
       }
       
-      // Always ensure loading is false after session check
+      // Set loading state to false after session check completes
       setIsLoading(false);
     });
 

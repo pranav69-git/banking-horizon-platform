@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { AuthContext } from "./AuthContext";
 import { useAuthState } from "@/hooks/use-auth-state";
@@ -29,14 +29,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Initialize auth effects - but don't wait for it to render UI
   useAuthEffects();
 
-  const logActivity = (action: string, details: string) => {
+  const logActivity = useCallback((action: string, details: string) => {
     if (!user?.id) return;
     
     const newLog = createActivityLog(action, details, user.id);
     const updatedLogs = [newLog, ...activityLogs];
     setActivityLogs(updatedLogs);
     saveActivityLogs(user.id, updatedLogs);
-  };
+  }, [user, activityLogs, setActivityLogs]);
 
   const updateProfile = async (profileData: Partial<UserProfile>) => {
     const updatedProfile = { ...profile, ...profileData };
@@ -56,7 +56,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const handleLogin = async (email: string, password: string) => {
+    setIsLoading(true);
     const result = await loginWithEmail(email, password);
+    setIsLoading(false);
     
     if (result.success) {
       toast({
@@ -132,7 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loginUser: handleLogin,
         logoutUser: handleLogout,
         isAuthenticated,
-        isLoading: false // Always set to false to immediately show content
+        isLoading
       }}
     >
       {children}

@@ -25,10 +25,10 @@ import { useRealTimeTransactions } from "@/hooks/use-real-time-transactions";
 
 export default function TransactionsPage() {
   const navigate = useNavigate();
-  const [transactionType, setTransactionType] = useState<string | null>(null);
-  const [status, setStatus] = useState<string | null>(null);
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [transactionType, setTransactionType] = useState<string | undefined>(undefined);
+  const [status, setStatus] = useState<string | undefined>(undefined);
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   
   // Use our real-time transactions hook
   const { transactions } = useRealTimeTransactions([]);
@@ -64,10 +64,10 @@ export default function TransactionsPage() {
   });
 
   const resetFilters = () => {
-    setTransactionType(null);
-    setStatus(null);
-    setStartDate(null);
-    setEndDate(null);
+    setTransactionType(undefined);
+    setStatus(undefined);
+    setStartDate(undefined);
+    setEndDate(undefined);
   };
 
   return (
@@ -89,7 +89,10 @@ export default function TransactionsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <label className="text-sm font-medium">Transaction Type</label>
-            <Select value={transactionType || undefined} onValueChange={setTransactionType}>
+            <Select 
+              value={transactionType} 
+              onValueChange={(value) => setTransactionType(value)}
+            >
               <SelectTrigger className="w-full mt-1">
                 <SelectValue placeholder="All Types" />
               </SelectTrigger>
@@ -103,7 +106,10 @@ export default function TransactionsPage() {
           
           <div>
             <label className="text-sm font-medium">Status</label>
-            <Select value={status || undefined} onValueChange={setStatus}>
+            <Select 
+              value={status} 
+              onValueChange={(value) => setStatus(value)}
+            >
               <SelectTrigger className="w-full mt-1">
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
@@ -134,7 +140,7 @@ export default function TransactionsPage() {
               <PopoverContent className="w-auto p-0 pointer-events-auto">
                 <Calendar
                   mode="single"
-                  selected={startDate || undefined}
+                  selected={startDate}
                   onSelect={setStartDate}
                   initialFocus
                   className="p-3 pointer-events-auto"
@@ -162,7 +168,7 @@ export default function TransactionsPage() {
               <PopoverContent className="w-auto p-0 pointer-events-auto">
                 <Calendar
                   mode="single"
-                  selected={endDate || undefined}
+                  selected={endDate}
                   onSelect={setEndDate}
                   initialFocus
                   className="p-3 pointer-events-auto"

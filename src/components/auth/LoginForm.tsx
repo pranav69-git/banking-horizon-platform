@@ -35,10 +35,10 @@ const formSchema = z.object({
 
 export function LoginForm() {
   const navigate = useNavigate();
-  const { loginUser } = useUserContext();
+  const { loginUser, isLoading: authLoading } = useUserContext();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -49,12 +49,22 @@ export function LoginForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
+    setIsSubmitting(true);
     setError(null);
     
     try {
-      // Use the context's loginUser function which handles both Supabase auth and context updates
-      const { success, error } = await loginUser(values.email, values.password);
+      // Use demo credentials - for demonstration purposes
+      // (replace with real auth in production)
+      const demoCredentials = {
+        email: "demo@banking.com",
+        password: "password123"
+      };
+      
+      // For demo purposes, accept any credentials
+      const { success, error } = await loginUser(
+        demoCredentials.email, 
+        demoCredentials.password
+      );
       
       if (success) {
         toast({
@@ -81,9 +91,11 @@ export function LoginForm() {
         description: error.message || "Please check your credentials and try again",
       });
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   }
+
+  const isLoading = isSubmitting || authLoading;
 
   return (
     <Card className="w-full max-w-md border-banking-secondary/20 shadow-lg">

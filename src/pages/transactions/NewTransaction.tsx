@@ -6,7 +6,7 @@ import { TransactionTabs } from "./components/TransactionTabs";
 import { TransactionReceipt } from "./components/TransactionReceipt";
 import { useToast } from "@/hooks/use-toast";
 import { useRealTimeTransactions } from "@/hooks/use-real-time-transactions";
-import { supabase } from "@/integrations/supabase/client";
+import { useUserContext } from "@/contexts/UserContext";
 
 export default function NewTransaction() {
   const navigate = useNavigate();
@@ -16,6 +16,7 @@ export default function NewTransaction() {
   const [isSuccessful, setIsSuccessful] = useState(false);
   const [receiptData, setReceiptData] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useUserContext();
   
   // Use our real-time transactions hook
   const { addTransaction } = useRealTimeTransactions([]);
@@ -40,7 +41,7 @@ export default function NewTransaction() {
       const transaction = await addTransaction({
         type: "deposit",
         amount: values.amount,
-        description: values.description || "Deposit",
+        description: values.description || "Deposit to account",
         status: "completed",
         account_id: values.accountId,
       });
@@ -52,7 +53,7 @@ export default function NewTransaction() {
         type: "deposit",
         account: values.accountId,
         amount: values.amount,
-        description: values.description || "Deposit",
+        description: values.description || "Deposit to account",
         status: "completed",
       };
       
@@ -89,7 +90,7 @@ export default function NewTransaction() {
       const transaction = await addTransaction({
         type: "withdrawal",
         amount: values.amount,
-        description: values.description || "Withdrawal",
+        description: values.description || "Withdrawal from account",
         status: "completed",
         account_id: values.accountId,
       });
@@ -101,7 +102,7 @@ export default function NewTransaction() {
         type: "withdrawal",
         account: values.accountId,
         amount: values.amount,
-        description: values.description || "Withdrawal",
+        description: values.description || "Withdrawal from account",
         status: "completed",
       };
       
@@ -138,7 +139,7 @@ export default function NewTransaction() {
       const transaction = await addTransaction({
         type: "transfer",
         amount: values.amount,
-        description: values.description || "Transfer",
+        description: values.description || "Transfer between accounts",
         status: "completed",
         account_id: values.fromAccountId,
         fromAccount: values.fromAccountId,
@@ -153,7 +154,7 @@ export default function NewTransaction() {
         fromAccount: values.fromAccountId,
         toAccount: values.toAccountId,
         amount: values.amount,
-        description: values.description || "Transfer",
+        description: values.description || "Transfer between accounts",
         status: "completed",
       };
       
