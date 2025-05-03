@@ -62,7 +62,7 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
             date: item.date || new Date().toISOString(),
             type: item.type as "deposit" | "withdrawal" | "transfer",
             amount: Number(item.amount),
-            description: item.description || item.type || "", // Use description if available, fall back to type
+            description: item.type, // Use type as description since description column doesn't exist
             status: item.status as "completed" | "pending" | "failed",
             account_id: item.account_id,
             fromAccount: item.from_account,
@@ -105,7 +105,7 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
               date: newTransaction.date || new Date().toISOString(),
               type: newTransaction.type as "deposit" | "withdrawal" | "transfer",
               amount: Number(newTransaction.amount),
-              description: newTransaction.description || newTransaction.type || "", // Use description if available, fall back to type
+              description: newTransaction.type, // Use type as description
               status: newTransaction.status as "completed" | "pending" | "failed",
               account_id: newTransaction.account_id,
               fromAccount: newTransaction.from_account,
@@ -132,7 +132,7 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
                       ...t,
                       status: updatedTransaction.status as "completed" | "pending" | "failed",
                       date: updatedTransaction.date || t.date,
-                      description: updatedTransaction.description || t.description || updatedTransaction.type || "",
+                      description: t.description || updatedTransaction.type, // Keep existing description or use type
                       fromAccount: updatedTransaction.from_account || t.fromAccount,
                       toAccount: updatedTransaction.to_account || t.toAccount,
                     } 
@@ -178,7 +178,7 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
         account_id: transaction.account_id || 'default-account',
         from_account: transaction.fromAccount,
         to_account: transaction.toAccount,
-        description: transaction.description,
+        // Remove description field since it doesn't exist in the database schema
       };
         
       // Then save to database
@@ -212,7 +212,7 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
         date: dbData.date || new Date().toISOString(),
         type: dbData.type as "deposit" | "withdrawal" | "transfer",
         amount: Number(dbData.amount),
-        description: dbData.description || dbData.type || "", // Use description if available, fall back to type
+        description: dbData.type, // Use type as description
         status: dbData.status as "completed" | "pending" | "failed",
         account_id: dbData.account_id,
         fromAccount: dbData.from_account,
