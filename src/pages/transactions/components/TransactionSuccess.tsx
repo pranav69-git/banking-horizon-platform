@@ -18,10 +18,16 @@ interface TransactionSuccessProps {
 }
 
 export function TransactionSuccess({ receiptData }: TransactionSuccessProps) {
+  // Ensure description is always defined, with a fallback if it's not provided
+  const normalizedReceiptData = {
+    ...receiptData,
+    description: receiptData.description || "Transaction completed"
+  };
+
   return (
     <DashboardLayout>
       <div className="max-w-md mx-auto">
-        <TransactionReceipt receiptData={receiptData} />
+        <TransactionReceipt receiptData={normalizedReceiptData} />
       </div>
     </DashboardLayout>
   );
