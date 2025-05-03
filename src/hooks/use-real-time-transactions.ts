@@ -42,8 +42,8 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
                 status: updatedTransaction.status as "completed" | "pending" | "failed" || t.status,
                 date: updatedTransaction.date || t.date,
                 description: t.description || updatedTransaction.type, // Keep existing description or use type
-                fromAccount: updatedTransaction.from_account || t.fromAccount,
-                toAccount: updatedTransaction.to_account || t.toAccount,
+                fromAccount: updatedTransaction.fromAccount || t.fromAccount,
+                toAccount: updatedTransaction.toAccount || t.toAccount,
               } 
             : t
         )
