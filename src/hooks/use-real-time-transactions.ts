@@ -51,8 +51,8 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
     }
   };
   
-  // Subscribe to real-time updates
-  useTransactionSubscription(subscriptionHandlers, user?.id);
+  // Subscribe to real-time updates - commented out as we're using mock data
+  // useTransactionSubscription(subscriptionHandlers, user?.id);
 
   // Function to add a new transaction
   const addTransaction = async (transaction: NewTransactionInput) => {
@@ -63,6 +63,7 @@ export function useRealTimeTransactions(initialTransactions: Transaction[] = [])
         ...transaction,
         id: tempId,
         date: new Date().toISOString(),
+        description: transaction.description || transaction.type,
       };
       
       // Update local state first for immediate feedback
