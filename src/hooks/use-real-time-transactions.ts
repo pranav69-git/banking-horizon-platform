@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { fetchTransactions, addTransactionToDb } from '@/services/transaction.service';
 import { Transaction, NewTransactionInput } from '@/types/transaction.types';
 
-export { Transaction }; // Export Transaction type from transaction.types
+export type { Transaction }; // Correctly re-export Transaction as a type
 
 export const useRealTimeTransactions = (
   initialTransactions: Transaction[] = [], 

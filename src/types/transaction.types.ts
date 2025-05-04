@@ -18,6 +18,7 @@ export interface DbTransaction {
   date: string;
   type: string;
   amount: number;
+  description?: string; // Added this field as it was missing
   status: string;
   account_id: string;
   from_account?: string;
