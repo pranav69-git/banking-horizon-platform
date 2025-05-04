@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { DbTransaction, Transaction, NewTransactionInput } from "@/types/transaction.types";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 // Format database transaction to frontend model
 export function formatDbTransaction(item: DbTransaction): Transaction {
@@ -10,7 +10,7 @@ export function formatDbTransaction(item: DbTransaction): Transaction {
     date: item.date || new Date().toISOString(),
     type: item.type as "deposit" | "withdrawal" | "transfer",
     amount: Number(item.amount),
-    description: item.type, // Use type as description since description column doesn't exist
+    description: item.description || item.type, // Use type as description as fallback
     status: item.status as "completed" | "pending" | "failed",
     account_id: item.account_id,
     // Handle fromAccount and toAccount properties safely
@@ -32,7 +32,7 @@ export async function fetchTransactions(): Promise<Transaction[]> {
 }
 
 // Add a new transaction to the database
-export async function addTransactionToDb(transaction: NewTransactionInput): Promise<Transaction | null> {
+export async function addTransactionToDb(transaction: NewTransactionInput, showToast = true): Promise<Transaction | null> {
   try {
     // Generate a transaction ID
     const transactionId = `TRX-${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`;
@@ -52,10 +52,13 @@ export async function addTransactionToDb(transaction: NewTransactionInput): Prom
     };
     
     // Show success toast only when explicitly adding a transaction, not during initial setup
-    toast({
-      title: "Transaction Successful",
-      description: `${transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)} of ₹${transaction.amount} completed successfully.`
-    });
+    if (showToast) {
+      const { toast } = useToast();
+      toast({
+        title: "Transaction Successful",
+        description: `${transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)} of ₹${transaction.amount} completed successfully.`
+      });
+    }
     
     return mockTransaction;
   } catch (error) {

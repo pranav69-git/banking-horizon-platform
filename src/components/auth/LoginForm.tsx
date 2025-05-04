@@ -35,7 +35,7 @@ const formSchema = z.object({
 
 export function LoginForm() {
   const navigate = useNavigate();
-  const { loginUser } = useUserContext();
+  const { loginUser, isLoading: authLoading } = useUserContext();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -152,9 +152,9 @@ export function LoginForm() {
             <Button 
               type="submit" 
               className="w-full bg-banking-primary hover:bg-banking-primary/90 mt-4"
-              disabled={isSubmitting}
+              disabled={isSubmitting || authLoading}
             >
-              {isSubmitting ? (
+              {isSubmitting || authLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
                   Logging in...

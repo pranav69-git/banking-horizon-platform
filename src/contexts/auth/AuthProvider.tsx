@@ -1,5 +1,5 @@
 
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { AuthContext } from "./AuthContext";
 import { useAuthState } from "@/hooks/use-auth-state";
@@ -64,6 +64,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setSession(result.data.session);
           setUser(result.data.user);
           setIsAuthenticated(true);
+          
+          // Set default profile information
+          const userName = email.split('@')[0] || "User";
+          setProfile({
+            name: userName,
+            email: email,
+            phone: "+91 9876543210", 
+            address: "123 MG Road, Bangalore, Karnataka 560001",
+            dob: "1985-06-15",
+            panCard: "ABCDE1234F"
+          });
+          
+          // Add login activity
+          const userId = result.data.user?.id;
+          if (userId) {
+            const newLog = createActivityLog("Login", "User logged in", userId);
+            const updatedLogs = [newLog];
+            setActivityLogs(updatedLogs);
+            saveActivityLogs(userId, updatedLogs);
+          }
         }
         
         return { success: true };

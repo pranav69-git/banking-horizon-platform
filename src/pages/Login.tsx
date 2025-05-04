@@ -6,7 +6,7 @@ import { useUserContext } from "@/contexts/UserContext";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useUserContext();
+  const { isAuthenticated, isLoading } = useUserContext();
   
   useEffect(() => {
     if (isAuthenticated) {
