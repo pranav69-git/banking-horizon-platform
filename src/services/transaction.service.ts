@@ -10,7 +10,7 @@ export function formatDbTransaction(item: DbTransaction): Transaction {
     date: item.date || new Date().toISOString(),
     type: item.type as "deposit" | "withdrawal" | "transfer",
     amount: Number(item.amount),
-    description: item.description || item.type, // Use type as description as fallback
+    description: item.description || item.type, // Use type as description if description doesn't exist
     status: item.status as "completed" | "pending" | "failed",
     account_id: item.account_id,
     // Handle fromAccount and toAccount properties safely

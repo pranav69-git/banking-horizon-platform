@@ -1,5 +1,5 @@
 
-import { Transaction } from "@/hooks/use-real-time-transactions";
+import { Transaction } from "@/types/transaction.types";
 
 // Transaction types
 const transactionTypes = ["deposit", "withdrawal", "transfer"];

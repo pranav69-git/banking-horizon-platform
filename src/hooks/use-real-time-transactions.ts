@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { fetchTransactions, addTransactionToDb } from '@/services/transaction.service';
 import { Transaction, NewTransactionInput } from '@/types/transaction.types';
 
+export { Transaction }; // Export Transaction type from transaction.types
+
 export const useRealTimeTransactions = (
   initialTransactions: Transaction[] = [], 
   showToasts: boolean = true
