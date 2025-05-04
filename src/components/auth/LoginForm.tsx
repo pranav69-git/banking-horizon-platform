@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -35,7 +34,7 @@ const formSchema = z.object({
 
 export function LoginForm() {
   const navigate = useNavigate();
-  const { loginUser, isLoading: authLoading } = useUserContext();
+  const { loginUser } = useUserContext();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -152,9 +151,9 @@ export function LoginForm() {
             <Button 
               type="submit" 
               className="w-full bg-banking-primary hover:bg-banking-primary/90 mt-4"
-              disabled={isSubmitting || authLoading}
+              disabled={isSubmitting}
             >
-              {isSubmitting || authLoading ? (
+              {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
                   Logging in...

@@ -6,7 +6,7 @@ import { useUserContext } from "@/contexts/UserContext";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading } = useUserContext();
+  const { isAuthenticated } = useUserContext(); // Removed isLoading as we don't need it here
   
   useEffect(() => {
     if (isAuthenticated) {

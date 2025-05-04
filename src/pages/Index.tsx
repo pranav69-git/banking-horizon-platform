@@ -5,7 +5,7 @@ import { useUserContext } from "@/contexts/UserContext";
 const Index = () => {
   const { isAuthenticated, isLoading } = useUserContext();
   
-  // Wait for authentication check to complete
+  // Only show loading spinner if auth check is in progress
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
