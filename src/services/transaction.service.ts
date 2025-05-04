@@ -51,7 +51,7 @@ export async function addTransactionToDb(transaction: NewTransactionInput): Prom
       toAccount: transaction.toAccount,
     };
     
-    // Show success toast
+    // Show success toast only when explicitly adding a transaction, not during initial setup
     toast({
       title: "Transaction Successful",
       description: `${transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)} of ₹${transaction.amount} completed successfully.`
@@ -60,13 +60,6 @@ export async function addTransactionToDb(transaction: NewTransactionInput): Prom
     return mockTransaction;
   } catch (error) {
     console.error('Error in addTransaction:', error);
-    
-    // Show error toast
-    toast({
-      title: "Transaction Failed",
-      description: "Could not save your transaction",
-      variant: "destructive"
-    });
     return null;
   }
 }

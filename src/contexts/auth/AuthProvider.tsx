@@ -47,42 +47,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const success = await updateUserProfileInDB(user.id, profileData);
       if (success) {
         logActivity("Profile Updated", "Profile information was updated");
-        toast({
-          title: "Profile Updated",
-          description: "Your profile information has been updated successfully."
-        });
       }
     }
   };
 
   const handleLogin = async (email: string, password: string) => {
     setIsLoading(true);
-    const result = await loginWithEmail(email, password);
-    setIsLoading(false);
     
-    if (result.success) {
-      toast({
-        title: "Login Successful",
-        description: "Welcome back to Banking Horizon!"
-      });
+    try {
+      const result = await loginWithEmail(email, password);
       
-      // Set authenticated state immediately on successful login
-      if (result.data && result.data.session) {
-        // Use the complete session object from the result
-        setSession(result.data.session);
-        setUser(result.data.user);
-        setIsAuthenticated(true);
+      if (result.success) {
+        // Set authenticated state immediately on successful login
+        if (result.data && result.data.session) {
+          // Use the complete session object from the result
+          setSession(result.data.session);
+          setUser(result.data.user);
+          setIsAuthenticated(true);
+        }
+        
+        return { success: true };
       }
       
-      return { success: true };
+      return { success: false, error: result.error };
+    } catch (error: any) {
+      console.error("Login error:", error);
+      return { success: false, error: error.message || "An unexpected error occurred" };
+    } finally {
+      setIsLoading(false);
     }
-    
-    toast({
-      variant: "destructive",
-      title: "Login Failed",
-      description: result.error || "Invalid credentials. Please try again."
-    });
-    return { success: false, error: result.error };
   };
 
   const handleLogout = async () => {
@@ -101,11 +94,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: result.error
       });
     } else {
-      toast({
-        title: "Logged Out",
-        description: "You have been successfully logged out."
-      });
-      
       setUser(null);
       setSession(null);
       setIsAuthenticated(false);

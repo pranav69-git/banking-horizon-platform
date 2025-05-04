@@ -35,7 +35,7 @@ const formSchema = z.object({
 
 export function LoginForm() {
   const navigate = useNavigate();
-  const { loginUser, isLoading: authLoading } = useUserContext();
+  const { loginUser } = useUserContext();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -53,8 +53,7 @@ export function LoginForm() {
     setError(null);
     
     try {
-      // Use demo credentials - for demonstration purposes
-      // (replace with real auth in production)
+      // Use demo credentials for demonstration purposes
       const demoCredentials = {
         email: "demo@banking.com",
         password: "password123"
@@ -84,18 +83,10 @@ export function LoginForm() {
     } catch (error: any) {
       console.error("Login error:", error);
       setError(error.message || "Failed to login. Please try again.");
-      
-      toast({
-        variant: "destructive",
-        title: "Login failed",
-        description: error.message || "Please check your credentials and try again",
-      });
     } finally {
       setIsSubmitting(false);
     }
   }
-
-  const isLoading = isSubmitting || authLoading;
 
   return (
     <Card className="w-full max-w-md border-banking-secondary/20 shadow-lg">
@@ -161,9 +152,9 @@ export function LoginForm() {
             <Button 
               type="submit" 
               className="w-full bg-banking-primary hover:bg-banking-primary/90 mt-4"
-              disabled={isLoading}
+              disabled={isSubmitting}
             >
-              {isLoading ? (
+              {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
                   Logging in...
