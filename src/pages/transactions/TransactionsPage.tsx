@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import { cn } from "@/lib/utils";
 import { useRealTimeTransactions } from "@/hooks/use-real-time-transactions";
 
 export default function TransactionsPage() {
@@ -31,7 +30,7 @@ export default function TransactionsPage() {
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   
   // Use our real-time transactions hook
-  const { transactions } = useRealTimeTransactions([]);
+  const { transactions, isLoading } = useRealTimeTransactions([]);
 
   // Filter transactions based on selected filters
   const filteredTransactions = transactions.filter((transaction) => {

@@ -1,7 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { DbTransaction, Transaction, NewTransactionInput } from "@/types/transaction.types";
-import { useToast } from "@/hooks/use-toast";
 
 // Format database transaction to frontend model
 export function formatDbTransaction(item: DbTransaction): Transaction {
@@ -38,7 +37,6 @@ export async function addTransactionToDb(transaction: NewTransactionInput, showT
     const transactionId = `TRX-${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`;
     
     // For demo purposes, return a mock successful transaction without hitting the database
-    // which has schema issues
     const mockTransaction: Transaction = {
       id: transactionId,
       date: new Date().toISOString(),
@@ -50,15 +48,6 @@ export async function addTransactionToDb(transaction: NewTransactionInput, showT
       fromAccount: transaction.fromAccount || transaction.account_id,
       toAccount: transaction.toAccount,
     };
-    
-    // Show success toast only when explicitly adding a transaction, not during initial setup
-    if (showToast) {
-      const { toast } = useToast();
-      toast({
-        title: "Transaction Successful",
-        description: `${transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)} of ₹${transaction.amount} completed successfully.`
-      });
-    }
     
     return mockTransaction;
   } catch (error) {

@@ -17,16 +17,13 @@ export function useTransactionForm() {
   const { user } = useUserContext();
   
   // Use our real-time transactions hook
-  const { addTransaction } = useRealTimeTransactions([]);
+  const { addTransaction } = useRealTimeTransactions();
 
   // Handle deposit form submission
   async function onDepositSubmit(values: any) {
     setIsSubmitting(true);
     
     try {
-      // Generate transaction ID
-      const transactionId = `TRX-${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`;
-      
       // Add the transaction to our database
       const transaction = await addTransaction({
         type: "deposit",
@@ -36,10 +33,14 @@ export function useTransactionForm() {
         account_id: values.accountId,
       } as NewTransactionInput);
       
+      if (!transaction) {
+        throw new Error("Failed to create transaction");
+      }
+      
       // Create receipt data
       const receiptData = {
-        transactionId: transaction?.id || transactionId,
-        date: new Date().toISOString(),
+        transactionId: transaction.id,
+        date: transaction.date,
         type: "deposit",
         account: values.accountId,
         amount: values.amount,
@@ -73,9 +74,6 @@ export function useTransactionForm() {
     setIsSubmitting(true);
     
     try {
-      // Generate transaction ID
-      const transactionId = `TRX-${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`;
-      
       // Add the transaction to our database
       const transaction = await addTransaction({
         type: "withdrawal",
@@ -85,10 +83,14 @@ export function useTransactionForm() {
         account_id: values.accountId,
       } as NewTransactionInput);
       
+      if (!transaction) {
+        throw new Error("Failed to create transaction");
+      }
+      
       // Create receipt data
       const receiptData = {
-        transactionId: transaction?.id || transactionId,
-        date: new Date().toISOString(),
+        transactionId: transaction.id,
+        date: transaction.date,
         type: "withdrawal",
         account: values.accountId,
         amount: values.amount,
@@ -122,9 +124,6 @@ export function useTransactionForm() {
     setIsSubmitting(true);
     
     try {
-      // Generate transaction ID
-      const transactionId = `TRX-${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`;
-      
       // Add the transaction to our database
       const transaction = await addTransaction({
         type: "transfer",
@@ -136,10 +135,14 @@ export function useTransactionForm() {
         toAccount: values.toAccountId,
       } as NewTransactionInput);
       
+      if (!transaction) {
+        throw new Error("Failed to create transaction");
+      }
+      
       // Create receipt data
       const receiptData = {
-        transactionId: transaction?.id || transactionId,
-        date: new Date().toISOString(),
+        transactionId: transaction.id,
+        date: transaction.date,
         type: "transfer",
         fromAccount: values.fromAccountId,
         toAccount: values.toAccountId,

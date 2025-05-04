@@ -10,6 +10,8 @@ export interface Transaction {
   fromAccount?: string;
   toAccount?: string;
   account_id?: string;
+  from_account?: string;
+  to_account?: string;
 }
 
 // Database transaction type to match what's in Supabase
@@ -18,7 +20,7 @@ export interface DbTransaction {
   date: string;
   type: string;
   amount: number;
-  description?: string; // Added this field as it was missing
+  description?: string;
   status: string;
   account_id: string;
   from_account?: string;

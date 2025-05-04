@@ -21,7 +21,9 @@ import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
-import { Transaction, useRealTimeTransactions } from "@/hooks/use-real-time-transactions";
+import { Transaction } from "@/types/transaction.types";
+import { useTransactionSubscription } from "@/hooks/use-transaction-subscription";
+import { useUserContext } from "@/contexts/UserContext";
 
 interface TransactionsListProps {
   transactions: Transaction[];
@@ -36,14 +38,34 @@ export function TransactionsList({
 }: TransactionsListProps) {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
+  const { user } = useUserContext();
   
-  // Use our real-time transactions hook with initial transactions
-  const { transactions } = useRealTimeTransactions(initialTransactions);
+  // Update local state when props change
+  useEffect(() => {
+    setTransactions(initialTransactions);
+  }, [initialTransactions]);
+
+  // Subscribe to real-time updates
+  useTransactionSubscription({
+    onInsert: (newTransaction) => {
+      setTransactions(prev => [newTransaction, ...prev]);
+    },
+    onUpdate: (id, updatedTransaction) => {
+      setTransactions(prev => 
+        prev.map(t => 
+          t.id === id 
+            ? { ...t, ...updatedTransaction, status: updatedTransaction.status as any } 
+            : t
+        )
+      );
+    }
+  }, user?.id);
   
-  // Filter transactions based on selected filters and search term
+  // Filter transactions based on search term
   const filteredTransactions = transactions.filter(
     (transaction) =>
-      transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (transaction.description?.toLowerCase().includes(searchTerm.toLowerCase()) || '') ||
       transaction.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       transaction.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
       transaction.status.toLowerCase().includes(searchTerm.toLowerCase())
@@ -142,7 +164,7 @@ export function TransactionsList({
                       </div>
                     </TableCell>
                     <TableCell className="max-w-[200px] truncate">
-                      {transaction.description}
+                      {transaction.description || transaction.type}
                     </TableCell>
                     <TableCell className="text-right font-mono">
                       {formatCurrency(transaction.amount)}
